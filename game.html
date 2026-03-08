@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matek Játék</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container game-container">
+        <!-- Game Header -->
+        <div class="game-header">
+            <div class="progress">
+                <span id="questionNumber">1</span> / <span id="totalQuestions">20</span>
+            </div>
+            <div class="score">
+                Pontok: <span id="score">0</span>
+            </div>
+        </div>
+
+        <!-- Question Display -->
+        <div class="question-container">
+            <div class="question" id="question">
+                <span id="num1">5</span>
+                <span id="operator">×</span>
+                <span id="num2">3</span>
+                <span>=</span>
+                <span>?</span>
+            </div>
+
+            <div class="timer">
+                ⏱️ <span id="timer">0.0</span>s
+            </div>
+        </div>
+
+        <!-- Answer Input -->
+        <div class="answer-container">
+            <input type="number" id="answer" class="answer-input" autofocus>
+            <button class="btn-primary" onclick="submitAnswer()">Válasz! ✓</button>
+        </div>
+
+        <!-- Feedback -->
+        <div id="feedback" class="feedback"></div>
+
+        <!-- Result Modal -->
+        <div id="resultModal" class="modal">
+            <div class="modal-content result-content">
+                <h2>🎉 Játék Vége! 🎉</h2>
+                
+                <div class="result-stats">
+                    <div class="stat">
+                        <div class="stat-label">Összes pont</div>
+                        <div class="stat-value" id="finalScore">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Helyes válaszok</div>
+                        <div class="stat-value" id="correctAnswers">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Pontosság</div>
+                        <div class="stat-value" id="accuracy">0%</div>
+                    </div>
+                </div>
+
+                <div id="newHeroTitle" class="new-hero-title"></div>
+
+                <div class="config-group">
+                    <label for="playerName">Add meg a neved:</label>
+                    <input type="text" id="playerName" class="answer-input" placeholder="Neved">
+                </div>
+
+                <div class="modal-buttons">
+                    <button class="btn-primary" onclick="saveAndReturn()">Mentés és Főmenü</button>
+                    <button class="btn-secondary" onclick="playAgain()">Új Játék</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="correctSound"></audio>
+    <audio id="wrongSound"></audio>
+
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

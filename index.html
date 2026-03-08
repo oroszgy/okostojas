@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matek Játék - Főmenü</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Matek Játék 🎮</h1>
+            <div class="hero-title" id="heroTitle"></div>
+        </div>
+
+        <!-- Theme Selection -->
+        <div class="theme-selector">
+            <button class="theme-btn" data-theme="girl">👧 Lány Téma</button>
+            <button class="theme-btn" data-theme="boy">👦 Fiú Téma</button>
+        </div>
+
+        <!-- Game Type Selection -->
+        <div class="menu">
+            <button class="game-btn" onclick="selectGame('multiply')">
+                <span class="icon">✖️➗</span>
+                <h2>Szorzás / Osztás</h2>
+            </button>
+            
+            <button class="game-btn" onclick="selectGame('add')">
+                <span class="icon">➕➖</span>
+                <h2>Összeadás / Kivonás</h2>
+            </button>
+
+            <button class="secondary-btn" onclick="showLeaderboard()">
+                <span class="icon">🏆</span>
+                Ranglista
+            </button>
+        </div>
+
+        <!-- Configuration Modal -->
+        <div id="configModal" class="modal">
+            <div class="modal-content">
+                <h2 id="configTitle"></h2>
+                
+                <div class="config-group">
+                    <label for="configValue" id="configLabel"></label>
+                    <select id="configValue" class="config-select"></select>
+                </div>
+
+                <div class="config-group">
+                    <label for="numQuestions">Kérdések száma:</label>
+                    <select id="numQuestions" class="config-select">
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20" selected>20</option>
+                        <option value="25">25</option>
+                        <option value="30">30</option>
+                    </select>
+                </div>
+
+                <div class="modal-buttons">
+                    <button class="btn-primary" onclick="startGame()">Játék Indítása! 🚀</button>
+                    <button class="btn-secondary" onclick="closeModal()">Mégse</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script>
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'girl';
+        document.body.className = `theme-${savedTheme}`;
+
+        // Theme selection
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const theme = this.dataset.theme;
+                localStorage.setItem('theme', theme);
+                document.body.className = `theme-${theme}`;
+            });
+        });
+
+        // Display hero title
+        const stats = getPlayerStats();
+        const title = getHeroTitle(stats.totalPoints);
+        if (title) {
+            document.getElementById('heroTitle').textContent = `⭐ ${title} ⭐`;
+        }
+
+        function selectGame(gameType) {
+            const modal = document.getElementById('configModal');
+            const configValue = document.getElementById('configValue');
+            const configLabel = document.getElementById('configLabel');
+            const configTitle = document.getElementById('configTitle');
+
+            // Clear previous options
+            configValue.innerHTML = '';
+
+            if (gameType === 'multiply') {
+                configTitle.textContent = 'Szorzás / Osztás Beállítás';
+                configLabel.textContent = 'Válassz alapszámot:';
+                for (let i = 2; i <= 10; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `${i}-es szorzótábla`;
+                    configValue.appendChild(option);
+                }
+            } else {
+                configTitle.textContent = 'Összeadás / Kivonás Beállítás';
+                configLabel.textContent = 'Válassz felső határt:';
+                [10, 20, 50, 100].forEach(num => {
+                    const option = document.createElement('option');
+                    option.value = num;
+                    option.textContent = `Számok 0-${num} között`;
+                    configValue.appendChild(option);
+                });
+            }
+
+            // Store game type for later
+            modal.dataset.gameType = gameType;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('configModal').style.display = 'none';
+        }
+
+        function startGame() {
+            const modal = document.getElementById('configModal');
+            const gameType = modal.dataset.gameType;
+            const configValue = document.getElementById('configValue').value;
+            const numQuestions = document.getElementById('numQuestions').value;
+
+            // Store configuration and navigate to game
+            localStorage.setItem('currentGame', JSON.stringify({
+                type: gameType,
+                config: parseInt(configValue),
+                numQuestions: parseInt(numQuestions)
+            }));
+
+            window.location.href = 'game.html';
+        }
+
+        function showLeaderboard() {
+            window.location.href = 'leaderboard.html';
+        }
+    </script>
+</body>
+</html>

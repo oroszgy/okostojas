@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranglista - Matek Játék</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Ranglista 🏆</h1>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterLeaderboard('all')">Összes</button>
+            <button class="filter-btn" onclick="filterLeaderboard('multiply')">Szorzás/Osztás</button>
+            <button class="filter-btn" onclick="filterLeaderboard('add')">Összeadás/Kivonás</button>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="leaderboard-container">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>🏅</th>
+                        <th>Név</th>
+                        <th>Pontszám</th>
+                        <th>Típus</th>
+                        <th>Dátum</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="no-scores" id="noScores" style="display: none;">
+            <p>Még nincsenek eredmények. Játssz egy játékot!</p>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <h2>📊 Statisztikák</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Összes játék</div>
+                    <div class="stat-value" id="totalGames">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Összes pont</div>
+                    <div class="stat-value" id="totalPoints">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Átlagos pontszám</div>
+                    <div class="stat-value" id="avgScore">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Legjobb eredmény</div>
+                    <div class="stat-value" id="bestScore">0</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="goHome()">Vissza a Főmenübe</button>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script>
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'girl';
+        document.body.className = `theme-${savedTheme}`;
+
+        let currentFilter = 'all';
+
+        function filterLeaderboard(type) {
+            currentFilter = type;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            displayLeaderboard();
+        }
+
+        function displayLeaderboard() {
+            const scores = getLeaderboard();
+            const tbody = document.getElementById('leaderboardBody');
+            const noScores = document.getElementById('noScores');
+
+            // Filter scores
+            const filteredScores = currentFilter === 'all' 
+                ? scores 
+                : scores.filter(s => s.gameType === currentFilter);
+
+            if (filteredScores.length === 0) {
+                tbody.innerHTML = '';
+                noScores.style.display = 'block';
+                return;
+            }
+
+            noScores.style.display = 'none';
+
+            tbody.innerHTML = filteredScores.map((score, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
+                const gameTypeName = score.gameType === 'multiply' ? 'Szorzás/Osztás' : 'Összeadás/Kivonás';
+                const date = new Date(score.date).toLocaleDateString('hu-HU');
+                
+                return `
+                    <tr>
+                        <td>${medal}</td>
+                        <td>${score.playerName}</td>
+                        <td><strong>${score.score}</strong></td>
+                        <td>${gameTypeName}</td>
+                        <td>${date}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function displayStatistics() {
+            const stats = getPlayerStats();
+            
+            document.getElementById('totalGames').textContent = stats.totalGames;
+            document.getElementById('totalPoints').textContent = stats.totalPoints;
+            document.getElementById('avgScore').textContent = stats.totalGames > 0 
+                ? Math.round(stats.totalPoints / stats.totalGames)
+                : 0;
+            document.getElementById('bestScore').textContent = stats.bestScore;
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize
+        displayLeaderboard();
+        displayStatistics();
+    </script>
+</body>
+</html>
