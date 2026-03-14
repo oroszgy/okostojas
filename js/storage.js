@@ -17,7 +17,7 @@ function getLastPracticeTimestamp(playerName) {
         if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
             const ts = parsed[user];
             if (!ts) return null;
-            const num = parseInt(ts, 10);
+            const num = Number(ts);
             return Number.isFinite(num) ? num : null;
         }
         // Old format (single integer string) — cannot attribute to a user; discard

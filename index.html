@@ -163,7 +163,6 @@
         // Update the hero title, mascot and regression message for the given player
         function updatePlayerDisplay(playerName) {
             const name = (playerName && playerName.trim()) || 'Névtelen';
-            localStorage.setItem('playerName', name);
 
             const stats = getPlayerStats(name);
             const title = getHeroTitle(stats.totalPoints);
@@ -184,7 +183,10 @@
         updatePlayerDisplay(savedPlayerName);
 
         currentUserInput.addEventListener('change', function() {
-            updatePlayerDisplay(this.value);
+            const name = (this.value && this.value.trim()) || 'Névtelen';
+            localStorage.setItem('playerName', name);
+            this.value = name;
+            updatePlayerDisplay(name);
             populateKnownUsers();
         });
 
