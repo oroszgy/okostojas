@@ -233,14 +233,20 @@
             const container = document.getElementById('bossSelection');
             container.innerHTML = '';
             BOSS_ENEMIES.forEach(boss => {
-                const card = document.createElement('div');
+                const card = document.createElement('button');
+                card.type = 'button';
                 card.className = 'boss-card' + (boss.id === selectedBossId ? ' selected' : '');
                 card.dataset.bossId = boss.id;
+                card.setAttribute('aria-pressed', boss.id === selectedBossId ? 'true' : 'false');
                 card.innerHTML = `<span class="boss-card-emoji">${boss.emoji}</span><span class="boss-card-name">${boss.name}</span>`;
                 card.addEventListener('click', () => {
                     selectedBossId = boss.id;
-                    container.querySelectorAll('.boss-card').forEach(c => c.classList.remove('selected'));
+                    container.querySelectorAll('.boss-card').forEach(c => {
+                        c.classList.remove('selected');
+                        c.setAttribute('aria-pressed', 'false');
+                    });
                     card.classList.add('selected');
+                    card.setAttribute('aria-pressed', 'true');
                 });
                 container.appendChild(card);
             });
