@@ -5,9 +5,9 @@ const HERO_TITLES = [
     { points: 0, title: null },
     { points: 100, title: 'Kezdő Matematikus' },
     { points: 500, title: 'Számok Barátja' },
-    { points: 1000, title: 'Matek Bajnok' },
+    { points: 1000, title: 'Okos Tojás' },
     { points: 2000, title: 'Számolásmester' },
-    { points: 5000, title: 'Matek Varázsló' }
+    { points: 5000, title: 'Tojásvarázsló' }
 ];
 
 // Get hero title based on points
@@ -48,7 +48,7 @@ const ENCOURAGEMENT_MESSAGES = [
     'Számgéniusz! 🤓',
     'A kalkulátor féltékeny rád! 🔢',
     'Meghajolok előtted! 🙇',
-    'Matekszuperhős! 🦸',
+    'Tojásszuperhős! 🦸',
     'Elolvadt az agyam az okosságodtól! 🧠',
     'A matekkönyv sír örömében! 📖😭',
     'Sherlock sem számolt ilyen gyorsan! 🔍',
@@ -72,7 +72,7 @@ const ERROR_MESSAGES = [
     'Ez csak bemelegítés volt! 🏃',
     'Még a tanár is téved néha! 👨‍🏫',
     'Az agyad gondolkodik, csak lassan! 🐢',
-    'Fel a fejjel, matek bajnok! 🦁',
+    'Fel a fejjel, okos tojás! 🦁',
     'Tovább! A matematikaolimpia vár! 🏅',
     'Ilyenkor tanulunk a legtöbbet! 💡',
     'A zsenik is tévednek néha! 🤓',
