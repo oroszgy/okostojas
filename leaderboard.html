@@ -66,7 +66,10 @@
             </div>
         </div>
 
-        <button class="btn-primary" onclick="goHome()">Vissza a Főmenübe</button>
+        <div class="nav-buttons">
+            <button class="btn-primary" onclick="goHome()">🏠 Vissza a Főmenübe</button>
+            <button class="btn-secondary" onclick="window.location.href='tasks.html'">📈 Feladat Statisztikák</button>
+        </div>
     </div>
 
     <script src="js/config.js"></script>
@@ -109,11 +112,20 @@
 
             noScores.style.display = 'none';
 
-            // Personal best for current filter (top score in this category)
+            // Personal best banner (built with DOM to avoid innerHTML injection)
             const personalBest = filteredScores[0].score;
             const typeName = currentFilter === 'multiply' ? 'Szorzás/Osztás' : 'Összeadás/Kivonás';
             banner.style.display = 'block';
-            banner.innerHTML = `🌟 Legjobb eredményed (${typeName}): <strong>${personalBest} pont</strong> — Le tudod dönteni?! 💪`;
+            banner.textContent = '';
+            const prefix = document.createElement('span');
+            prefix.textContent = `🌟 Legjobb eredményed (${typeName}): `;
+            const bold = document.createElement('strong');
+            bold.textContent = `${personalBest} pont`;
+            const suffix = document.createElement('span');
+            suffix.textContent = ' — Le tudod dönteni?! 💪';
+            banner.appendChild(prefix);
+            banner.appendChild(bold);
+            banner.appendChild(suffix);
 
             tbody.innerHTML = filteredScores.map((score, index) => {
                 const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);

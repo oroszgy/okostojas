@@ -102,31 +102,67 @@ function updateStatistics(newScore, gameType) {
     }
 }
 
-// Get task statistics (per-question tracking for weighted selection)
-function getTaskStats() {
+// Get raw task event history from localStorage
+// Format: { taskKey: [{ c: 1|0, t: timestampMs }, ...], ... }
+function getTaskHistory() {
     const data = localStorage.getItem(TASK_STATS_KEY);
     if (!data) return {};
     try {
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        // Migrate old aggregate format ({ correct, wrong }) to event arrays by discarding
+        // (old entries had no timestamps so date-range filtering is not possible for them)
+        const result = {};
+        for (const [key, value] of Object.entries(parsed)) {
+            if (Array.isArray(value)) {
+                result[key] = value;
+            }
+            // Old-format entries without timestamps are silently dropped
+        }
+        return result;
     } catch (e) {
-        console.error('Error parsing task stats:', e);
+        console.error('Error parsing task history:', e);
         return {};
     }
 }
 
+// Get task statistics filtered by an optional date range.
+// fromDate / toDate are Date objects or null (null means no limit).
+// Returns: { taskKey: { correct, wrong, total }, ... }
+function getTaskStatsByDateRange(fromDate, toDate) {
+    const history = getTaskHistory();
+    const stats = {};
+    const fromTs = fromDate ? fromDate.getTime() : 0;
+    const toTs = toDate ? toDate.getTime() : Date.now();
+
+    for (const [key, events] of Object.entries(history)) {
+        const filtered = events.filter(e => e.t >= fromTs && e.t <= toTs);
+        if (filtered.length > 0) {
+            const correct = filtered.filter(e => e.c === 1).length;
+            const wrong = filtered.filter(e => e.c === 0).length;
+            stats[key] = { correct, wrong, total: correct + wrong };
+        }
+    }
+    return stats;
+}
+
+// Get task statistics (all-time) for weighted question selection
+function getTaskStats() {
+    return getTaskStatsByDateRange(null, null);
+}
+
 // Update individual task result for adaptive question selection
 function updateTaskResult(taskKey, isCorrect) {
-    const stats = getTaskStats();
-    if (!stats[taskKey]) {
-        stats[taskKey] = { correct: 0, wrong: 0 };
+    const history = getTaskHistory();
+    if (!history[taskKey]) {
+        history[taskKey] = [];
     }
-    if (isCorrect) {
-        stats[taskKey].correct += 1;
-    } else {
-        stats[taskKey].wrong += 1;
+    history[taskKey].push({ c: isCorrect ? 1 : 0, t: Date.now() });
+    // Cap at 500 events per task; trim to 450 to avoid slicing on every update
+    if (history[taskKey].length > 500) {
+        history[taskKey] = history[taskKey].slice(-450);
     }
     try {
-        localStorage.setItem(TASK_STATS_KEY, JSON.stringify(stats));
+        localStorage.setItem(TASK_STATS_KEY, JSON.stringify(history));
     } catch (e) {
         console.error('Error saving task stats:', e);
     }

@@ -144,8 +144,12 @@ function generateAddQuestion() {
 
     const totalFailedWeight = failedTasks.reduce((sum, t) => sum + t.weight, 0);
 
-    // With probability proportional to failed weight, reuse a previously-failed task
-    if (failedTasks.length > 0 && Math.random() * (totalFailedWeight + totalFailedWeight) < totalFailedWeight) {
+    // Select a previously-failed task with probability proportional to the failure weight.
+    // A fixed base weight of 10 represents the "generate a fresh random question" option,
+    // ensuring a uniform distribution when there are no failures and a gradual shift
+    // towards failed tasks as failure weight grows.
+    const BASE_RANDOM_WEIGHT = 10;
+    if (failedTasks.length > 0 && Math.random() * (totalFailedWeight + BASE_RANDOM_WEIGHT) < totalFailedWeight) {
         const selected = weightedRandom(failedTasks);
         // key format: add:{limit}:{num1}:{num2}:{op}
         const parts = selected.key.split(':');

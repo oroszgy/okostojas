@@ -558,7 +558,99 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Mobile Responsive */
+/* Task statistics page */
+.date-filter-section {
+    margin-bottom: 20px;
+}
+
+.date-shortcuts {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.date-inputs {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    font-weight: bold;
+    color: #555;
+}
+
+.date-inputs input[type="date"] {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: inherit;
+    cursor: pointer;
+    margin-left: 6px;
+}
+
+.task-controls {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    font-weight: bold;
+    color: #555;
+}
+
+.task-controls .config-select {
+    width: auto;
+    padding: 10px 15px;
+}
+
+.task-formula {
+    font-family: 'Courier New', monospace;
+    font-size: 0.95em;
+}
+
+.task-correct {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.task-wrong {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.task-error-high {
+    background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.task-error-medium {
+    background: rgba(251, 146, 60, 0.15) !important;
+}
+
+.task-error-low {
+    background: rgba(34, 197, 94, 0.08) !important;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .date-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+
 @media (max-width: 768px) {
     body {
         padding: 10px;

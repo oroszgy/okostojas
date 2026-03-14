@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feladat Statisztikák - Matek Játék</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 Feladat Statisztikák</h1>
+        </div>
+
+        <!-- Date Range Section -->
+        <div class="date-filter-section">
+            <div class="date-shortcuts">
+                <button class="filter-btn active" data-range="week"  onclick="setDateRange('week', event)">Elmúlt 7 nap</button>
+                <button class="filter-btn"         data-range="month" onclick="setDateRange('month', event)">Elmúlt 30 nap</button>
+                <button class="filter-btn"         data-range="all"   onclick="setDateRange('all', event)">Összes</button>
+            </div>
+            <div class="date-inputs">
+                <label>Től: <input type="date" id="dateFrom" onchange="onCustomDate()"></label>
+                <label>Ig: &nbsp;<input type="date" id="dateTo"   onchange="onCustomDate()"></label>
+            </div>
+        </div>
+
+        <!-- Task Type Filter -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="setTypeFilter('all', event)">Összes feladat</button>
+            <button class="filter-btn" onclick="setTypeFilter('multiply', event)">✖️➗ Szorzás/Osztás</button>
+            <button class="filter-btn" onclick="setTypeFilter('add', event)">➕➖ Összeadás/Kivonás</button>
+        </div>
+
+        <!-- Sort Control -->
+        <div class="task-controls">
+            <label>Rendezés:
+                <select id="sortBy" class="config-select" onchange="displayTasks()">
+                    <option value="errorRate">Hibaarány (csökkenő)</option>
+                    <option value="wrong">Hibák száma (csökkenő)</option>
+                    <option value="total">Összes próbálkozás (csökkenő)</option>
+                </select>
+            </label>
+        </div>
+
+        <!-- Tasks Table -->
+        <div class="leaderboard-container">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Feladat</th>
+                        <th>✅ Helyes</th>
+                        <th>❌ Hibás</th>
+                        <th>Hibaarány</th>
+                    </tr>
+                </thead>
+                <tbody id="tasksBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="no-scores" id="noTasks" style="display: none;">
+            <p>Nincsenek feladat adatok a megadott időszakra. Játssz egy játékot!</p>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn-primary"   onclick="window.location.href='leaderboard.html'">🏆 Ranglista</button>
+            <button class="btn-secondary" onclick="window.location.href='index.html'">🏠 Főmenü</button>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script>
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'girl';
+        document.body.className = `theme-${savedTheme}`;
+
+        let currentTypeFilter = 'all';
+
+        // ── Date helpers ──────────────────────────────────────────────────────
+
+        function formatDateInput(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function setDateRange(range, event) {
+            // Highlight the active shortcut button
+            document.querySelectorAll('.date-shortcuts .filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+
+            const today = new Date();
+            document.getElementById('dateTo').value = formatDateInput(today);
+
+            if (range === 'week') {
+                const from = new Date(today);
+                from.setDate(from.getDate() - 7);
+                document.getElementById('dateFrom').value = formatDateInput(from);
+            } else if (range === 'month') {
+                const from = new Date(today);
+                from.setMonth(from.getMonth() - 1);
+                document.getElementById('dateFrom').value = formatDateInput(from);
+            } else {
+                // 'all' — clear the from date
+                document.getElementById('dateFrom').value = '';
+            }
+
+            displayTasks();
+        }
+
+        function onCustomDate() {
+            // Deselect shortcut buttons when user manually picks a date
+            document.querySelectorAll('.date-shortcuts .filter-btn').forEach(btn => btn.classList.remove('active'));
+            displayTasks();
+        }
+
+        // ── Type filter ───────────────────────────────────────────────────────
+
+        function setTypeFilter(type, event) {
+            currentTypeFilter = type;
+            document.querySelectorAll('.filter-buttons .filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+            displayTasks();
+        }
+
+        // ── Task key formatting ───────────────────────────────────────────────
+
+        function formatTaskKey(key) {
+            const parts = key.split(':');
+            if (parts[0] === 'multiply') {
+                const base = parseInt(parts[1]);
+                const mult = parseInt(parts[2]);
+                return `${base} × ${mult} = ${base * mult}  /  ${base * mult} ÷ ${base} = ${mult}`;
+            } else {
+                // add:{limit}:{num1}:{num2}:{op}
+                const num1 = parseInt(parts[2]);
+                const num2 = parseInt(parts[3]);
+                const op   = parts[4];
+                const sym  = op === 'add' ? '+' : '−';
+                const res  = op === 'add' ? num1 + num2 : num1 - num2;
+                return `${num1} ${sym} ${num2} = ${res}`;
+            }
+        }
+
+        function getTaskType(key) {
+            return key.startsWith('multiply') ? 'multiply' : 'add';
+        }
+
+        // ── Main display ──────────────────────────────────────────────────────
+
+        function displayTasks() {
+            const fromVal = document.getElementById('dateFrom').value;
+            const toVal   = document.getElementById('dateTo').value;
+
+            const fromDate = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+            const toDate   = toVal   ? new Date(toVal   + 'T23:59:59.999') : null;
+
+            const stats = getTaskStatsByDateRange(fromDate, toDate);
+
+            const tbody  = document.getElementById('tasksBody');
+            const noMsg  = document.getElementById('noTasks');
+
+            // Build task array with computed error rate, apply type filter
+            let tasks = Object.entries(stats)
+                .filter(([key]) => currentTypeFilter === 'all' || getTaskType(key) === currentTypeFilter)
+                .map(([key, s]) => ({
+                    key,
+                    correct:   s.correct,
+                    wrong:     s.wrong,
+                    total:     s.total,
+                    errorRate: s.total > 0 ? Math.round((s.wrong / s.total) * 100) : 0
+                }));
+
+            // Sort
+            const sortBy = document.getElementById('sortBy').value;
+            if (sortBy === 'errorRate') {
+                tasks.sort((a, b) => b.errorRate - a.errorRate || b.wrong - a.wrong);
+            } else if (sortBy === 'wrong') {
+                tasks.sort((a, b) => b.wrong - a.wrong || b.errorRate - a.errorRate);
+            } else {
+                tasks.sort((a, b) => b.total - a.total);
+            }
+
+            if (tasks.length === 0) {
+                tbody.innerHTML = '';
+                noMsg.style.display = 'block';
+                return;
+            }
+
+            noMsg.style.display = 'none';
+
+            tbody.innerHTML = tasks.map(task => {
+                let rowClass = '';
+                if (task.errorRate >= 50) rowClass = 'task-error-high';
+                else if (task.errorRate >= 25) rowClass = 'task-error-medium';
+                else if (task.wrong > 0)       rowClass = 'task-error-low';
+
+                const icon = task.errorRate >= 50 ? '🔥 ' : task.errorRate >= 25 ? '⚠️ ' : '';
+
+                return `
+                    <tr class="${rowClass}">
+                        <td class="task-formula">${icon}${formatTaskKey(task.key)}</td>
+                        <td class="task-correct">${task.correct}</td>
+                        <td class="task-wrong">${task.wrong}</td>
+                        <td>${task.errorRate}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ── Init ──────────────────────────────────────────────────────────────
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Default: last 7 days
+            setDateRange('week', null);
+            document.querySelector('.date-shortcuts [data-range="week"]').classList.add('active');
+        });
+    </script>
+</body>
+</html>
