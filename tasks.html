@@ -12,6 +12,13 @@
             <h1>📈 Feladat Statisztikák</h1>
         </div>
 
+        <!-- User Selector -->
+        <div class="config-group" style="margin-bottom: 0.5rem;">
+            <label for="userSelect">Játékos:
+                <select id="userSelect" class="config-select" onchange="displayTasks()"></select>
+            </label>
+        </div>
+
         <!-- Date Range Section -->
         <div class="date-filter-section">
             <div class="date-shortcuts">
@@ -155,7 +162,8 @@
             const fromDate = fromVal ? new Date(fromVal + 'T00:00:00') : null;
             const toDate   = toVal   ? new Date(toVal   + 'T23:59:59.999') : null;
 
-            const stats = getTaskStatsByDateRange(fromDate, toDate);
+            const selectedUser = document.getElementById('userSelect').value;
+            const stats = getTaskStatsByDateRange(fromDate, toDate, selectedUser);
 
             const tbody  = document.getElementById('tasksBody');
             const noMsg  = document.getElementById('noTasks');
@@ -210,7 +218,26 @@
 
         // ── Init ──────────────────────────────────────────────────────────────
 
+        function populateUserSelect() {
+            const select = document.getElementById('userSelect');
+            select.innerHTML = '';
+            const users = getAllUsers();
+            const currentPlayer = localStorage.getItem('playerName') || 'Névtelen';
+
+            // If there are no users yet, add the current player as a placeholder
+            const list = users.length > 0 ? users : [currentPlayer];
+
+            list.forEach(u => {
+                const option = document.createElement('option');
+                option.value = u;
+                option.textContent = u;
+                if (u === currentPlayer) option.selected = true;
+                select.appendChild(option);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            populateUserSelect();
             // Default: last 7 days
             setDateRange('week', null);
             document.querySelector('.date-shortcuts [data-range="week"]').classList.add('active');

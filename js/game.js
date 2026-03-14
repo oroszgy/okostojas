@@ -96,7 +96,7 @@ function weightedRandom(items) {
 // Generate multiplication/division question with weighted selection
 function generateMultiplyQuestion() {
     const maxBase = gameConfig.config;
-    const taskStats = getTaskStats();
+    const taskStats = getTaskStats(gameConfig.playerName);
 
     // Build a weighted list of candidate (base, multiplier) pairs.
     // When includeLowerNumbers is set, all bases from 2..maxBase are included;
@@ -141,7 +141,7 @@ function generateMultiplyQuestion() {
 // Generate addition/subtraction question with weighted selection for known failing tasks
 function generateAddQuestion() {
     const limit = gameConfig.config;
-    const taskStats = getTaskStats();
+    const taskStats = getTaskStats(gameConfig.playerName);
 
     // Collect previously-failed tasks for this limit
     const failedTasks = [];
@@ -292,7 +292,7 @@ function submitAnswer() {
     }
 
     // Track task result for adaptive question selection
-    updateTaskResult(getTaskKey(question), isCorrect);
+    updateTaskResult(getTaskKey(question), isCorrect, gameConfig.playerName);
     
     // Move to next question after delay
     currentQuestion++;
@@ -371,15 +371,15 @@ function endGame() {
     document.getElementById('accuracy').textContent = `${accuracy}%`;
     
     // Check for new hero title
-    const oldStats = getPlayerStats();
+    const oldStats = getPlayerStats(gameConfig.playerName);
     const newHeroTitle = checkNewHeroTitle(oldStats.totalPoints, oldStats.totalPoints + score);
     
     if (newHeroTitle) {
         document.getElementById('newHeroTitle').textContent = `🎉 Új cím feloldva: ${newHeroTitle}! 🎉`;
     }
     
-    // Load saved player name if available
-    const savedName = localStorage.getItem('playerName') || '';
+    // Pre-fill player name from game config (set before game started)
+    const savedName = gameConfig.playerName || localStorage.getItem('playerName') || '';
     document.getElementById('playerName').value = savedName;
     
     // Show result modal

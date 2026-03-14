@@ -4,6 +4,11 @@ const STORAGE_KEY = 'mathGameLeaderboard';
 const STATS_KEY = 'mathGameStats';
 const TASK_STATS_KEY = 'mathGameTaskStats';
 
+// Helper: normalise a player name for use as a storage key
+function normaliseUser(playerName) {
+    return (playerName && playerName.trim()) || 'Névtelen';
+}
+
 // Get leaderboard from localStorage
 function getLeaderboard() {
     const data = localStorage.getItem(STORAGE_KEY);
@@ -41,8 +46,8 @@ function saveScore(playerName, score, gameType, correct, total) {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(topScores));
         
-        // Update statistics
-        updateStatistics(score, gameType);
+        // Update per-user statistics
+        updateStatistics(score, gameType, playerName);
         
         return true;
     } catch (e) {
@@ -51,28 +56,57 @@ function saveScore(playerName, score, gameType, correct, total) {
     }
 }
 
-// Get player statistics
-function getPlayerStats() {
+// Get player statistics for a specific user
+function getPlayerStats(playerName) {
+    const user = normaliseUser(playerName);
+    const defaultStats = {
+        totalGames: 0,
+        totalPoints: 0,
+        bestScore: 0,
+        multiply: { games: 0, bestScore: 0 },
+        add: { games: 0, bestScore: 0 }
+    };
     const data = localStorage.getItem(STATS_KEY);
-    if (!data) {
-        return {
-            totalGames: 0,
-            totalPoints: 0,
-            bestScore: 0,
-            multiply: { games: 0, bestScore: 0 },
-            add: { games: 0, bestScore: 0 }
-        };
-    }
+    if (!data) return defaultStats;
     
     try {
-        const stats = JSON.parse(data);
+        const parsed = JSON.parse(data);
+        // Detect old flat format (has a numeric 'totalGames' at the top level)
+        if (typeof parsed.totalGames === 'number') {
+            return defaultStats;
+        }
+        const stats = parsed[user];
+        if (!stats) return defaultStats;
         // Ensure per-type fields exist for older saved data
         if (!stats.multiply) stats.multiply = { games: 0, bestScore: 0 };
         if (!stats.add) stats.add = { games: 0, bestScore: 0 };
         return stats;
     } catch (e) {
         console.error('Error parsing statistics:', e);
-        return {
+        return defaultStats;
+    }
+}
+
+// Update player statistics for a specific user
+function updateStatistics(newScore, gameType, playerName) {
+    const user = normaliseUser(playerName);
+    const data = localStorage.getItem(STATS_KEY);
+    let allStats = {};
+
+    if (data) {
+        try {
+            const parsed = JSON.parse(data);
+            // Migrate old flat format: discard (cannot be attributed to a user)
+            if (typeof parsed.totalGames !== 'number') {
+                allStats = parsed;
+            }
+        } catch (e) {
+            console.error('Error parsing statistics:', e);
+        }
+    }
+
+    if (!allStats[user]) {
+        allStats[user] = {
             totalGames: 0,
             totalPoints: 0,
             bestScore: 0,
@@ -80,12 +114,11 @@ function getPlayerStats() {
             add: { games: 0, bestScore: 0 }
         };
     }
-}
 
-// Update player statistics
-function updateStatistics(newScore, gameType) {
-    const stats = getPlayerStats();
-    
+    const stats = allStats[user];
+    if (!stats.multiply) stats.multiply = { games: 0, bestScore: 0 };
+    if (!stats.add) stats.add = { games: 0, bestScore: 0 };
+
     stats.totalGames += 1;
     stats.totalPoints += Math.max(0, newScore); // Don't count negative scores
     stats.bestScore = Math.max(stats.bestScore, newScore);
@@ -96,27 +129,36 @@ function updateStatistics(newScore, gameType) {
     }
     
     try {
-        localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+        localStorage.setItem(STATS_KEY, JSON.stringify(allStats));
     } catch (e) {
         console.error('Error saving statistics:', e);
     }
 }
 
-// Get raw task event history from localStorage
-// Format: { taskKey: [{ c: 1|0, t: timestampMs }, ...], ... }
-function getTaskHistory() {
+// Get raw task event history from localStorage for a specific user.
+// Format (new): { username: { taskKey: [{ c: 1|0, t: timestampMs }, ...], ... }, ... }
+function getTaskHistory(playerName) {
+    const user = normaliseUser(playerName);
     const data = localStorage.getItem(TASK_STATS_KEY);
     if (!data) return {};
     try {
         const parsed = JSON.parse(data);
-        // Migrate old aggregate format ({ correct, wrong }) to event arrays by discarding
-        // (old entries had no timestamps so date-range filtering is not possible for them)
+        // Detect old flat format: values at the top level are arrays, not objects.
+        const firstValue = Object.values(parsed)[0];
+        if (firstValue === undefined) return {};
+        if (Array.isArray(firstValue)) {
+            // Old global format — cannot map to individual users; return empty.
+            return {};
+        }
+        // New per-user format
+        const userHistory = parsed[user] || {};
         const result = {};
-        for (const [key, value] of Object.entries(parsed)) {
+        for (const [key, value] of Object.entries(userHistory)) {
             if (Array.isArray(value)) {
                 result[key] = value;
+            } else {
+                console.warn('Unexpected non-array task history entry for key:', key);
             }
-            // Old-format entries without timestamps are silently dropped
         }
         return result;
     } catch (e) {
@@ -125,11 +167,11 @@ function getTaskHistory() {
     }
 }
 
-// Get task statistics filtered by an optional date range.
+// Get task statistics filtered by an optional date range for a specific user.
 // fromDate / toDate are Date objects or null (null means no limit).
 // Returns: { taskKey: { correct, wrong, total }, ... }
-function getTaskStatsByDateRange(fromDate, toDate) {
-    const history = getTaskHistory();
+function getTaskStatsByDateRange(fromDate, toDate, playerName) {
+    const history = getTaskHistory(playerName);
     const stats = {};
     const fromTs = fromDate ? fromDate.getTime() : 0;
     const toTs = toDate ? toDate.getTime() : Date.now();
@@ -145,26 +187,56 @@ function getTaskStatsByDateRange(fromDate, toDate) {
     return stats;
 }
 
-// Get task statistics (all-time) for weighted question selection
-function getTaskStats() {
-    return getTaskStatsByDateRange(null, null);
+// Get task statistics (all-time) for a specific user, used for weighted question selection
+function getTaskStats(playerName) {
+    return getTaskStatsByDateRange(null, null, playerName);
 }
 
-// Update individual task result for adaptive question selection
-function updateTaskResult(taskKey, isCorrect) {
-    const history = getTaskHistory();
-    if (!history[taskKey]) {
-        history[taskKey] = [];
+// Update individual task result for adaptive question selection, scoped to a user
+function updateTaskResult(taskKey, isCorrect, playerName) {
+    const user = normaliseUser(playerName);
+    const data = localStorage.getItem(TASK_STATS_KEY);
+    let allHistory = {};
+
+    if (data) {
+        try {
+            const parsed = JSON.parse(data);
+            const firstValue = Object.values(parsed)[0];
+            // If old flat format, start fresh with the new per-user structure
+            if (firstValue !== undefined && !Array.isArray(firstValue)) {
+                allHistory = parsed;
+            }
+        } catch (e) {
+            console.error('Error parsing task stats:', e);
+        }
     }
-    history[taskKey].push({ c: isCorrect ? 1 : 0, t: Date.now() });
+
+    if (!allHistory[user]) allHistory[user] = {};
+    if (!allHistory[user][taskKey]) allHistory[user][taskKey] = [];
+
+    allHistory[user][taskKey].push({ c: isCorrect ? 1 : 0, t: Date.now() });
     // Cap at 500 events per task; trim to 450 to avoid slicing on every update
-    if (history[taskKey].length > 500) {
-        history[taskKey] = history[taskKey].slice(-450);
+    if (allHistory[user][taskKey].length > 500) {
+        allHistory[user][taskKey] = allHistory[user][taskKey].slice(-450);
     }
     try {
-        localStorage.setItem(TASK_STATS_KEY, JSON.stringify(history));
+        localStorage.setItem(TASK_STATS_KEY, JSON.stringify(allHistory));
     } catch (e) {
         console.error('Error saving task stats:', e);
+    }
+}
+
+// Return the list of all users who have task statistics stored
+function getAllUsers() {
+    const data = localStorage.getItem(TASK_STATS_KEY);
+    if (!data) return [];
+    try {
+        const parsed = JSON.parse(data);
+        const firstValue = Object.values(parsed)[0];
+        if (firstValue === undefined || Array.isArray(firstValue)) return [];
+        return Object.keys(parsed).sort();
+    } catch (e) {
+        return [];
     }
 }
 

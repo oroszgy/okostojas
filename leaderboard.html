@@ -146,7 +146,8 @@
         }
 
         function displayStatistics() {
-            const stats = getPlayerStats();
+            const currentPlayer = localStorage.getItem('playerName') || 'Névtelen';
+            const stats = getPlayerStats(currentPlayer);
             
             document.getElementById('totalGames').textContent = stats.totalGames;
             document.getElementById('multiplyBest').textContent = stats.multiply.bestScore;
@@ -154,7 +155,6 @@
 
             // Next hero title progress
             const currentPoints = stats.totalPoints;
-            const currentTitle = getHeroTitle(currentPoints);
             let nextTitleText = '🏆 Legmagasabb cím!';
             for (let i = 0; i < HERO_TITLES.length; i++) {
                 if (HERO_TITLES[i].points > currentPoints) {
@@ -164,6 +164,12 @@
                 }
             }
             document.getElementById('nextTitle').textContent = nextTitleText;
+
+            // Show whose stats are displayed
+            const statsSection = document.querySelector('.stats-section h2');
+            if (statsSection) {
+                statsSection.textContent = `📊 ${currentPlayer} statisztikái`;
+            }
         }
 
         function goHome() {

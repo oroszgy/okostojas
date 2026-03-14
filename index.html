@@ -46,6 +46,11 @@
         <div id="configModal" class="modal">
             <div class="modal-content">
                 <h2 id="configTitle"></h2>
+
+                <div class="config-group">
+                    <label for="playerNameInput">Játékos neve:</label>
+                    <input type="text" id="playerNameInput" class="config-select" placeholder="Írd be a nevedet..." maxlength="30">
+                </div>
                 
                 <div class="config-group">
                     <label for="configValue" id="configLabel"></label>
@@ -83,8 +88,8 @@
             });
         });
 
-        // Display hero title
-        const stats = getPlayerStats();
+        // Display hero title for the current player
+        const stats = getPlayerStats(localStorage.getItem('playerName'));
         const title = getHeroTitle(stats.totalPoints);
         if (title) {
             document.getElementById('heroTitle').textContent = `⭐ ${title} ⭐`;
@@ -122,9 +127,16 @@
                 });
             }
 
+            // Pre-fill player name from last session
+            const savedName = localStorage.getItem('playerName') || '';
+            document.getElementById('playerNameInput').value = savedName;
+
             // Store game type for later
             modal.dataset.gameType = gameType;
             modal.style.display = 'flex';
+
+            // Focus the player name field so it is easy to type
+            document.getElementById('playerNameInput').focus();
         }
 
         function closeModal() {
@@ -136,13 +148,18 @@
             const gameType = modal.dataset.gameType;
             const configValue = document.getElementById('configValue').value;
             const includeLowerNumbers = gameType === 'multiply' && document.getElementById('includeLowerNumbers').checked;
+            const playerName = document.getElementById('playerNameInput').value.trim() || 'Névtelen';
+
+            // Persist player name for future sessions
+            localStorage.setItem('playerName', playerName);
 
             // Store configuration and navigate to game
             localStorage.setItem('currentGame', JSON.stringify({
                 type: gameType,
                 config: parseInt(configValue),
                 numQuestions: 20,
-                includeLowerNumbers: includeLowerNumbers
+                includeLowerNumbers: includeLowerNumbers,
+                playerName: playerName
             }));
 
             window.location.href = 'game.html';
