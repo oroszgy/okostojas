@@ -1,17 +1,18 @@
 // Configuration and utility functions
 
 // Hero titles based on total points
+// Evenly spaced at 500-pt intervals so each tier requires ~40 correct answers
 const HERO_TITLES = [
     { points: 0, title: null },
-    { points: 100, title: 'Tojáscsíra 🌱' },
-    { points: 300, title: 'Repedező Tojás 🥚' },
-    { points: 600, title: 'Frissen Kelt Számolós 🐣' },
-    { points: 1000, title: 'Okos Tojás 🧠' },
-    { points: 2000, title: 'Számolásmester 🔢' },
-    { points: 3500, title: 'Tojászseni 💡' },
-    { points: 5000, title: 'Tojásvarázsló 🪄' },
-    { points: 8000, title: 'Aranytojás 🥇' },
-    { points: 12000, title: 'A Nagy Tojás 👑' }
+    { points: 500, title: 'Tojáscsíra 🌱' },
+    { points: 1000, title: 'Repedező Tojás 🥚' },
+    { points: 1500, title: 'Frissen Kelt Számolós 🐣' },
+    { points: 2000, title: 'Okos Tojás 🧠' },
+    { points: 2500, title: 'Számolásmester 🔢' },
+    { points: 3000, title: 'Tojászseni 💡' },
+    { points: 3500, title: 'Tojásvarázsló 🪄' },
+    { points: 4000, title: 'Aranytojás 🥇' },
+    { points: 4500, title: 'A Nagy Tojás 👑' }
 ];
 
 // Get hero title based on points
@@ -118,11 +119,14 @@ function getErrorMessage() {
 }
 
 // Calculate score based on time
+// Correct: 10 base pts + speed bonus (0–9 pts for answers under 10 s) → 10–19 pts
+// Wrong: -5 pts (roughly half a correct answer lost per mistake)
+// At ~12 pts average per correct answer, each 500-pt tier gap takes ~40 correct answers.
 function calculateScore(timeInSeconds, isCorrect) {
-    if (!isCorrect) return -20;
-    
-    const basePoints = 100;
-    const speedBonus = Math.max(0, Math.floor(100 - timeInSeconds));
+    if (!isCorrect) return -5;
+
+    const basePoints = 10;
+    const speedBonus = Math.max(0, Math.floor(10 - timeInSeconds));
     return basePoints + speedBonus;
 }
 
