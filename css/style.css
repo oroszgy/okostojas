@@ -261,6 +261,22 @@ body {
     font-family: inherit;
 }
 
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+    color: #555;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+}
+
 .modal-buttons {
     display: flex;
     gap: 15px;

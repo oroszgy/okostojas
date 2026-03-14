@@ -64,8 +64,8 @@ function generateQuestion() {
 // Return the storage key used to track a question's result
 function getTaskKey(question) {
     if (gameConfig.type === 'multiply') {
-        const base = gameConfig.config;
-        // Both × and ÷ for the same fact share one key
+        // Extract actual base and multiplier from the question regardless of operator
+        const base = question.operator === '×' ? question.num1 : question.num2;
         const multiplier = question.operator === '×' ? question.num2 : question.answer;
         return `multiply:${base}:${multiplier}`;
     } else {
@@ -93,24 +93,33 @@ function weightedRandom(items) {
     return items[items.length - 1];
 }
 
-// Generate multiplication/division question with weighted multiplier selection
+// Generate multiplication/division question with weighted selection
 function generateMultiplyQuestion() {
-    const base = gameConfig.config;
+    const maxBase = gameConfig.config;
     const taskStats = getTaskStats();
 
-    // Build a weighted list of all possible multipliers (1-10)
+    // Build a weighted list of candidate (base, multiplier) pairs.
+    // When includeLowerNumbers is set, all bases from 2..maxBase are included;
+    // otherwise only the selected base is used.
+    const bases = gameConfig.includeLowerNumbers
+        ? Array.from({ length: maxBase - 1 }, (_, i) => i + 2)  // [2 .. maxBase]
+        : [maxBase];
+
     const choices = [];
-    for (let i = 1; i <= 10; i++) {
-        const key = `multiply:${base}:${i}`;
-        choices.push({ multiplier: i, weight: getTaskWeight(taskStats[key]) });
+    for (const b of bases) {
+        for (let i = 1; i <= 10; i++) {
+            const key = `multiply:${b}:${i}`;
+            choices.push({ base: b, multiplier: i, weight: getTaskWeight(taskStats[key]) });
+        }
     }
 
     const selected = weightedRandom(choices);
+    const base = selected.base;
     const multiplier = selected.multiplier;
 
     // 50% chance of multiplication, 50% division
     const isMultiply = Math.random() < 0.5;
-    
+
     if (isMultiply) {
         return {
             num1: base,
