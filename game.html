@@ -35,8 +35,31 @@
 
         <!-- Answer Input -->
         <div class="answer-container">
-            <input type="number" id="answer" class="answer-input" autofocus>
+            <input type="number" id="answer" class="answer-input">
             <button class="btn-primary" onclick="submitAnswer()">Válasz! ✓</button>
+        </div>
+
+        <!-- Numpad Toggle -->
+        <div class="numpad-toggle-row">
+            <button type="button" class="numpad-toggle-btn" id="numpadToggle" onclick="toggleNumpad()">🔢 Számbillentyűzet</button>
+        </div>
+
+        <!-- Numeric Keypad -->
+        <div id="numpad" class="numpad">
+            <div class="numpad-grid">
+                <button type="button" class="numpad-btn" onclick="numpadPress(7)">7</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(8)">8</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(9)">9</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(4)">4</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(5)">5</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(6)">6</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(1)">1</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(2)">2</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(3)">3</button>
+                <button type="button" class="numpad-btn numpad-btn-backspace" onclick="numpadBackspace()">⌫</button>
+                <button type="button" class="numpad-btn" onclick="numpadPress(0)">0</button>
+                <button type="button" class="numpad-btn numpad-btn-submit" onclick="submitAnswer()">✓</button>
+            </div>
         </div>
 
         <!-- Feedback -->

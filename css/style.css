@@ -658,6 +658,119 @@ body {
     margin-top: 20px;
 }
 
+/* Numpad Toggle */
+.numpad-toggle-row {
+    text-align: center;
+    margin: 5px 0 10px;
+}
+
+.numpad-toggle-btn {
+    padding: 10px 22px;
+    font-size: 1em;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+    font-weight: bold;
+    font-family: inherit;
+}
+
+.numpad-toggle-btn:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.numpad-toggle-btn.active {
+    background: rgba(74, 144, 226, 0.15);
+    border-color: #4a90e2;
+    color: #2c5aa0;
+}
+
+/* Numeric Keypad */
+.numpad {
+    display: none;
+    margin: 10px auto 5px;
+    max-width: 320px;
+}
+
+.numpad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.numpad-btn {
+    padding: 18px 10px;
+    font-size: 1.8em;
+    font-weight: bold;
+    border: 3px solid #ddd;
+    border-radius: 15px;
+    cursor: pointer;
+    background: white;
+    transition: background 0.1s ease, transform 0.1s ease, box-shadow 0.1s ease;
+    font-family: inherit;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.numpad-btn:hover {
+    background: #f0f4ff;
+    transform: scale(1.05);
+}
+
+.numpad-btn:active {
+    transform: scale(0.92);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.numpad-btn-backspace {
+    background: #fff4f4;
+    border-color: #ffbbbb;
+}
+
+.numpad-btn-backspace:hover {
+    background: #ffe0e0;
+}
+
+.numpad-btn-submit {
+    background: #f0fff4;
+    border-color: #86efac;
+    color: #16a34a;
+}
+
+.numpad-btn-submit:hover {
+    background: #dcfce7;
+}
+
+.theme-girl .numpad-toggle-btn.active {
+    background: rgba(255, 173, 255, 0.2);
+    border-color: #c239b3;
+    color: #c239b3;
+}
+
+.theme-girl .numpad-btn-submit {
+    background: linear-gradient(135deg, #FFADFF 0%, #c239b3 100%);
+    border-color: #c239b3;
+    color: white;
+}
+
+.theme-girl .numpad-btn-submit:hover {
+    background: linear-gradient(135deg, #e89ce8 0%, #b030a0 100%);
+}
+
+.theme-boy .numpad-btn-submit {
+    background: linear-gradient(135deg, #4a90e2 0%, #2c5aa0 100%);
+    border-color: #2c5aa0;
+    color: white;
+}
+
+.theme-boy .numpad-btn-submit:hover {
+    background: linear-gradient(135deg, #3a7fd0 0%, #1c4a90 100%);
+}
+
 /* Mobile */
 @media (max-width: 480px) {
     .date-inputs {
