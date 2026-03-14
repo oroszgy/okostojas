@@ -44,7 +44,19 @@ const ENCOURAGEMENT_MESSAGES = [
     'Briliáns! 💎',
     'Kitűnő! 🏆',
     'Zseniális! 🚀',
-    'Profi vagy! 🌈'
+    'Profi vagy! 🌈',
+    'Számgéniusz! 🤓',
+    'A kalkulátor féltékeny rád! 🔢',
+    'Meghajolok előtted! 🙇',
+    'Matekszuperhős! 🦸',
+    'Elolvadt az agyam az okosságodtól! 🧠',
+    'A matek könyv sír örömében! 📖😭',
+    'Sherlock sem számolt ilyen gyorsan! 🔍',
+    'Azt hittem csak a tanárod tudja! 😄',
+    'Robot vagy, vagy csak nagyon okos?! 🤖',
+    'Pumpáld meg a bicepszed! 💪🦾',
+    'Az osztály legokosabb agyveleje! 🧠🥇',
+    'Ilyen tempóval a Hold sem elég távol! 🌙🚀'
 ];
 
 // Error messages for wrong answers
@@ -53,7 +65,24 @@ const ERROR_MESSAGES = [
     'Majdnem! Nem adod fel! 🌟',
     'Jó próbálkozás! Tovább! ⭐',
     'Tanulás közben vagy! 📚',
-    'Rajta, következő! 🎯'
+    'Rajta, következő! 🎯',
+    'A számok csavarosak! 😅',
+    'Minden mester volt egyszer kezdő! 🎓',
+    'A kalkulátor is elhibázza néha! 🤭',
+    'Ez csak bemelegítés volt! 🏃',
+    'Még a tanár is téved néha! 👨‍🏫',
+    'Az agyad gondolkodik, csak lassan! 🐢',
+    'Fel a fejjel, matek bajnok! 🦁',
+    'Tovább! A matematikaolimpia vár! 🏅',
+    'Ilyenkor tanulunk a legtöbbet! 💡',
+    'A zsenik is tévednek néha! 🤓',
+    'Próbálkozás teszi a mestert! 🔄',
+    'Egy kicsi hiba, de annál nagyobb szív! ❤️',
+    'Ne add fel, a szám csak viccelt! 😜',
+    'Gyerünk, te ezt tudod! 🙌',
+    'Az agy felmelegedés közben! 🧠🔥',
+    'Hibák nélkül nincs tanulás! 📝',
+    'Figyelj csak, majd sikerül! 👀'
 ];
 
 // Get random encouragement message
