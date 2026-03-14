@@ -61,11 +61,53 @@ function generateQuestion() {
     }
 }
 
-// Generate multiplication/division question
+// Return the storage key used to track a question's result
+function getTaskKey(question) {
+    if (gameConfig.type === 'multiply') {
+        const base = gameConfig.config;
+        // Both × and ÷ for the same fact share one key
+        const multiplier = question.operator === '×' ? question.num2 : question.answer;
+        return `multiply:${base}:${multiplier}`;
+    } else {
+        const limit = gameConfig.config;
+        const op = question.operator === '+' ? 'add' : 'sub';
+        return `add:${limit}:${question.num1}:${question.num2}:${op}`;
+    }
+}
+
+// Calculate selection weight for a task.
+// Returns 1 (base weight) when no errors or no data, higher when errors exceed correct answers.
+function getTaskWeight(stats) {
+    if (!stats || stats.wrong === 0) return 1;
+    return Math.max(1, 1 + stats.wrong - stats.correct);
+}
+
+// Weighted random selection from an array of { weight, ... } objects
+function weightedRandom(items) {
+    const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
+    let rand = Math.random() * totalWeight;
+    for (const item of items) {
+        rand -= item.weight;
+        if (rand <= 0) return item;
+    }
+    return items[items.length - 1];
+}
+
+// Generate multiplication/division question with weighted multiplier selection
 function generateMultiplyQuestion() {
     const base = gameConfig.config;
-    const multiplier = Math.floor(Math.random() * 10) + 1;
-    
+    const taskStats = getTaskStats();
+
+    // Build a weighted list of all possible multipliers (1-10)
+    const choices = [];
+    for (let i = 1; i <= 10; i++) {
+        const key = `multiply:${base}:${i}`;
+        choices.push({ multiplier: i, weight: getTaskWeight(taskStats[key]) });
+    }
+
+    const selected = weightedRandom(choices);
+    const multiplier = selected.multiplier;
+
     // 50% chance of multiplication, 50% division
     const isMultiply = Math.random() < 0.5;
     
@@ -87,10 +129,36 @@ function generateMultiplyQuestion() {
     }
 }
 
-// Generate addition/subtraction question
+// Generate addition/subtraction question with weighted selection for known failing tasks
 function generateAddQuestion() {
     const limit = gameConfig.config;
-    
+    const taskStats = getTaskStats();
+
+    // Collect previously-failed tasks for this limit
+    const failedTasks = [];
+    for (const [key, stats] of Object.entries(taskStats)) {
+        if (key.startsWith(`add:${limit}:`) && stats.wrong > 0) {
+            failedTasks.push({ key, weight: getTaskWeight(stats) });
+        }
+    }
+
+    const totalFailedWeight = failedTasks.reduce((sum, t) => sum + t.weight, 0);
+
+    // With probability proportional to failed weight, reuse a previously-failed task
+    if (failedTasks.length > 0 && Math.random() * (totalFailedWeight + totalFailedWeight) < totalFailedWeight) {
+        const selected = weightedRandom(failedTasks);
+        // key format: add:{limit}:{num1}:{num2}:{op}
+        const parts = selected.key.split(':');
+        const num1 = parseInt(parts[2]);
+        const num2 = parseInt(parts[3]);
+        const op = parts[4];
+        if (op === 'add') {
+            return { num1, num2, operator: '+', answer: num1 + num2 };
+        } else {
+            return { num1, num2, operator: '−', answer: num1 - num2 };
+        }
+    }
+
     // 50% chance of addition, 50% subtraction
     const isAdd = Math.random() < 0.5;
     
@@ -202,6 +270,9 @@ function submitAnswer() {
         feedback.className = 'feedback wrong';
         playSound('wrong');
     }
+
+    // Track task result for adaptive question selection
+    updateTaskResult(getTaskKey(question), isCorrect);
     
     // Move to next question after delay
     currentQuestion++;

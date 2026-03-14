@@ -12,12 +12,14 @@
             <h1>🏆 Ranglista 🏆</h1>
         </div>
 
-        <!-- Filter Buttons -->
+        <!-- Filter Buttons (no aggregate tab) -->
         <div class="filter-buttons">
-            <button class="filter-btn active" onclick="filterLeaderboard('all')">Összes</button>
-            <button class="filter-btn" onclick="filterLeaderboard('multiply')">Szorzás/Osztás</button>
-            <button class="filter-btn" onclick="filterLeaderboard('add')">Összeadás/Kivonás</button>
+            <button class="filter-btn active" onclick="filterLeaderboard('multiply', event)">✖️➗ Szorzás/Osztás</button>
+            <button class="filter-btn" onclick="filterLeaderboard('add', event)">➕➖ Összeadás/Kivonás</button>
         </div>
+
+        <!-- Motivational personal-best banner -->
+        <div id="personalBestBanner" class="personal-best-banner" style="display: none;"></div>
 
         <!-- Leaderboard Table -->
         <div class="leaderboard-container">
@@ -27,7 +29,7 @@
                         <th>🏅</th>
                         <th>Név</th>
                         <th>Pontszám</th>
-                        <th>Típus</th>
+                        <th>Pontosság</th>
                         <th>Dátum</th>
                     </tr>
                 </thead>
@@ -50,16 +52,16 @@
                     <div class="stat-value" id="totalGames">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Összes pont</div>
-                    <div class="stat-value" id="totalPoints">0</div>
+                    <div class="stat-label">Szorzás/Osztás legjobb</div>
+                    <div class="stat-value" id="multiplyBest">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Átlagos pontszám</div>
-                    <div class="stat-value" id="avgScore">0</div>
+                    <div class="stat-label">Összeadás/Kivonás legjobb</div>
+                    <div class="stat-value" id="addBest">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Legjobb eredmény</div>
-                    <div class="stat-value" id="bestScore">0</div>
+                    <div class="stat-label">Következő cím</div>
+                    <div class="stat-value" id="nextTitle" style="font-size: 1em;">-</div>
                 </div>
             </div>
         </div>
@@ -67,22 +69,25 @@
         <button class="btn-primary" onclick="goHome()">Vissza a Főmenübe</button>
     </div>
 
+    <script src="js/config.js"></script>
     <script src="js/storage.js"></script>
     <script>
         // Initialize theme
         const savedTheme = localStorage.getItem('theme') || 'girl';
         document.body.className = `theme-${savedTheme}`;
 
-        let currentFilter = 'all';
+        let currentFilter = 'multiply';
 
-        function filterLeaderboard(type) {
+        function filterLeaderboard(type, event) {
             currentFilter = type;
             
             // Update active button
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
 
             displayLeaderboard();
         }
@@ -91,31 +96,37 @@
             const scores = getLeaderboard();
             const tbody = document.getElementById('leaderboardBody');
             const noScores = document.getElementById('noScores');
+            const banner = document.getElementById('personalBestBanner');
 
-            // Filter scores
-            const filteredScores = currentFilter === 'all' 
-                ? scores 
-                : scores.filter(s => s.gameType === currentFilter);
+            const filteredScores = scores.filter(s => s.gameType === currentFilter);
 
             if (filteredScores.length === 0) {
                 tbody.innerHTML = '';
                 noScores.style.display = 'block';
+                banner.style.display = 'none';
                 return;
             }
 
             noScores.style.display = 'none';
 
+            // Personal best for current filter (top score in this category)
+            const personalBest = filteredScores[0].score;
+            const typeName = currentFilter === 'multiply' ? 'Szorzás/Osztás' : 'Összeadás/Kivonás';
+            banner.style.display = 'block';
+            banner.innerHTML = `🌟 Legjobb eredményed (${typeName}): <strong>${personalBest} pont</strong> — Le tudod dönteni?! 💪`;
+
             tbody.innerHTML = filteredScores.map((score, index) => {
                 const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1);
-                const gameTypeName = score.gameType === 'multiply' ? 'Szorzás/Osztás' : 'Összeadás/Kivonás';
                 const date = new Date(score.date).toLocaleDateString('hu-HU');
+                const isTopScore = index === 0;
+                const rowClass = isTopScore ? 'top-score-row' : '';
                 
                 return `
-                    <tr>
+                    <tr class="${rowClass}">
                         <td>${medal}</td>
-                        <td>${score.playerName}</td>
+                        <td>${score.playerName}${isTopScore ? ' ⭐' : ''}</td>
                         <td><strong>${score.score}</strong></td>
-                        <td>${gameTypeName}</td>
+                        <td>${score.accuracy}%</td>
                         <td>${date}</td>
                     </tr>
                 `;
@@ -126,11 +137,21 @@
             const stats = getPlayerStats();
             
             document.getElementById('totalGames').textContent = stats.totalGames;
-            document.getElementById('totalPoints').textContent = stats.totalPoints;
-            document.getElementById('avgScore').textContent = stats.totalGames > 0 
-                ? Math.round(stats.totalPoints / stats.totalGames)
-                : 0;
-            document.getElementById('bestScore').textContent = stats.bestScore;
+            document.getElementById('multiplyBest').textContent = stats.multiply.bestScore;
+            document.getElementById('addBest').textContent = stats.add.bestScore;
+
+            // Next hero title progress
+            const currentPoints = stats.totalPoints;
+            const currentTitle = getHeroTitle(currentPoints);
+            let nextTitleText = '🏆 Legmagasabb cím!';
+            for (let i = 0; i < HERO_TITLES.length; i++) {
+                if (HERO_TITLES[i].points > currentPoints) {
+                    const needed = HERO_TITLES[i].points - currentPoints;
+                    nextTitleText = `${HERO_TITLES[i].title} (még ${needed} pont)`;
+                    break;
+                }
+            }
+            document.getElementById('nextTitle').textContent = nextTitleText;
         }
 
         function goHome() {

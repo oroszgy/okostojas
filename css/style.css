@@ -436,6 +436,26 @@ body {
     animation: pulse 2s infinite;
 }
 
+/* Personal best banner on leaderboard */
+.personal-best-banner {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ff6b00;
+    background: rgba(255, 215, 0, 0.2);
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+/* Highlight the top-score row in the leaderboard */
+.top-score-row {
+    background: rgba(255, 215, 0, 0.25) !important;
+    font-weight: bold;
+}
+
 /* Leaderboard */
 .filter-buttons {
     display: flex;
