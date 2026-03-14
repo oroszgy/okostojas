@@ -47,15 +47,11 @@
                     <select id="configValue" class="config-select"></select>
                 </div>
 
-                <div class="config-group">
-                    <label for="numQuestions">Kérdések száma:</label>
-                    <select id="numQuestions" class="config-select">
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                        <option value="20" selected>20</option>
-                        <option value="25">25</option>
-                        <option value="30">30</option>
-                    </select>
+                <div class="config-group" id="lowerNumbersGroup" style="display:none">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="includeLowerNumbers">
+                        Kisebb számok is (pl. 5-nél: 2, 3, 4, 5)
+                    </label>
                 </div>
 
                 <div class="modal-buttons">
@@ -107,7 +103,10 @@
                     option.textContent = `${i}-es szorzótábla`;
                     configValue.appendChild(option);
                 }
+                document.getElementById('lowerNumbersGroup').style.display = '';
+                document.getElementById('includeLowerNumbers').checked = false;
             } else {
+                document.getElementById('lowerNumbersGroup').style.display = 'none';
                 configTitle.textContent = 'Összeadás / Kivonás Beállítás';
                 configLabel.textContent = 'Válassz felső határt:';
                 [10, 20, 50, 100].forEach(num => {
@@ -131,13 +130,14 @@
             const modal = document.getElementById('configModal');
             const gameType = modal.dataset.gameType;
             const configValue = document.getElementById('configValue').value;
-            const numQuestions = document.getElementById('numQuestions').value;
+            const includeLowerNumbers = gameType === 'multiply' && document.getElementById('includeLowerNumbers').checked;
 
             // Store configuration and navigate to game
             localStorage.setItem('currentGame', JSON.stringify({
                 type: gameType,
                 config: parseInt(configValue),
-                numQuestions: parseInt(numQuestions)
+                numQuestions: 20,
+                includeLowerNumbers: includeLowerNumbers
             }));
 
             window.location.href = 'game.html';

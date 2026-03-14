@@ -63,7 +63,10 @@ function generateQuestion() {
 
 // Generate multiplication/division question
 function generateMultiplyQuestion() {
-    const base = gameConfig.config;
+    const maxBase = gameConfig.config;
+    const base = gameConfig.includeLowerNumbers
+        ? Math.floor(Math.random() * (maxBase - 1)) + 2  // random from 2 to maxBase
+        : maxBase;
     const multiplier = Math.floor(Math.random() * 10) + 1;
     
     // 50% chance of multiplication, 50% division
