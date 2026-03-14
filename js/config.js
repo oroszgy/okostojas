@@ -111,12 +111,15 @@ function getErrorMessage() {
     return ERROR_MESSAGES[Math.floor(Math.random() * ERROR_MESSAGES.length)];
 }
 
+// Maximum time (seconds) considered fast enough for a full speed bonus
+const ANSWER_TIME_LIMIT = 20;
+
 // Calculate score based on time
 function calculateScore(timeInSeconds, isCorrect) {
     if (!isCorrect) return -20;
-    
+
     const basePoints = 100;
-    const speedBonus = Math.max(0, Math.floor(100 - timeInSeconds));
+    const speedBonus = Math.max(0, Math.floor(100 * (ANSWER_TIME_LIMIT - timeInSeconds) / ANSWER_TIME_LIMIT));
     return basePoints + speedBonus;
 }
 

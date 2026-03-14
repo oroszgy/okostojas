@@ -207,8 +207,15 @@ function nextQuestion() {
     document.getElementById('feedback').className = 'feedback';
     
     // Clear answer input
-    document.getElementById('answer').value = '';
-    document.getElementById('answer').focus();
+    const answerInput = document.getElementById('answer');
+    answerInput.value = '';
+
+    // Only auto-focus the input when the numpad is hidden so that
+    // the native virtual keyboard does not pop up on touch devices
+    // while the custom numpad is in use.
+    if (document.getElementById('numpad').style.display !== 'block') {
+        answerInput.focus();
+    }
     
     if (currentQuestion >= questions.length) {
         endGame();
@@ -304,7 +311,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Restore numpad preference
+    const numpad = document.getElementById('numpad');
+    const toggleBtn = document.getElementById('numpadToggle');
+    if (numpad && toggleBtn) {
+        const showNumpad = localStorage.getItem('showNumpad') === '1';
+        numpad.style.display = showNumpad ? 'block' : 'none';
+        toggleBtn.classList.toggle('active', showNumpad);
+        if (answerInput && showNumpad) {
+            answerInput.setAttribute('inputmode', 'none');
+        }
+    }
 });
+
+// Toggle the on-screen numeric keypad
+function toggleNumpad() {
+    const numpad = document.getElementById('numpad');
+    const toggleBtn = document.getElementById('numpadToggle');
+    const answerInput = document.getElementById('answer');
+    const isVisible = numpad.style.display !== 'none';
+
+    numpad.style.display = isVisible ? 'none' : 'block';
+    toggleBtn.classList.toggle('active', !isVisible);
+
+    // Suppress the native virtual keyboard when the custom numpad is shown
+    if (!isVisible) {
+        answerInput.setAttribute('inputmode', 'none');
+        answerInput.blur();
+    } else {
+        answerInput.removeAttribute('inputmode');
+        answerInput.focus();
+    }
+
+    localStorage.setItem('showNumpad', !isVisible ? '1' : '0');
+}
+
+// Append a digit via the on-screen numpad
+function numpadPress(digit) {
+    const answerInput = document.getElementById('answer');
+    answerInput.value += digit;
+}
+
+// Delete the last character via the on-screen numpad
+function numpadBackspace() {
+    const answerInput = document.getElementById('answer');
+    answerInput.value = answerInput.value.slice(0, -1);
+}
 
 // End game and show results
 function endGame() {
