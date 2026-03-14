@@ -3,11 +3,15 @@
 // Hero titles based on total points
 const HERO_TITLES = [
     { points: 0, title: null },
-    { points: 100, title: 'Kezdő Matematikus' },
-    { points: 500, title: 'Számok Barátja' },
-    { points: 1000, title: 'Okos Tojás' },
-    { points: 2000, title: 'Számolásmester' },
-    { points: 5000, title: 'Tojásvarázsló' }
+    { points: 100, title: 'Tojáscsíra 🌱' },
+    { points: 300, title: 'Repedező Tojás 🥚' },
+    { points: 600, title: 'Frissen Kelt Számolós 🐣' },
+    { points: 1000, title: 'Okos Tojás 🧠' },
+    { points: 2000, title: 'Számolásmester 🔢' },
+    { points: 3500, title: 'Tojászseni 💡' },
+    { points: 5000, title: 'Tojásvarázsló 🪄' },
+    { points: 8000, title: 'Aranytojás 🥇' },
+    { points: 12000, title: 'A Nagy Tojás 👑' }
 ];
 
 // Get hero title based on points
@@ -56,7 +60,14 @@ const ENCOURAGEMENT_MESSAGES = [
     'Robot vagy, vagy csak nagyon okos?! 🤖',
     'Pumpáld meg a bicepszed! 💪🦾',
     'Az osztály legokosabb agyveleje! 🧠🥇',
-    'Ilyen tempóval a Hold sem elég távol! 🌙🚀'
+    'Ilyen tempóval a Hold sem elég távol! 🌙🚀',
+    'Tojásból kikelt a zsenialitás! 🐣💡',
+    'Ez nem tojás, ez egy szuperszámológép! 🥚🔢',
+    'Aranytojást tojt az agyad! 🥇🥚',
+    'Gyorsabb vagy, mint egy friss reggeli tojás! 🍳⚡',
+    'Így kell ezt! A tojások büszkék rád! 🥚🎖️',
+    'Krakk! Megrepesztette a feladatot! 💥🥚',
+    'Annyira okos vagy, hogy tojást is tudsz kotlani! 🐔🧠'
 ];
 
 // Error messages for wrong answers
@@ -82,7 +93,12 @@ const ERROR_MESSAGES = [
     'Gyerünk, te ezt tudod! 🙌',
     'Az agyad épp felmelegszik! 🧠🔥',
     'Hibák nélkül nincs tanulás! 📝',
-    'Figyelj csak, majd sikerül! 👀'
+    'Figyelj csak, majd sikerül! 👀',
+    'A tojás sem lesz egyszerre főtt – türelem! 🥚⏳',
+    'Minden okos tojás így kezdte! 🐣',
+    'Repedés nélkül nem kel ki a tudás! 🥚💡',
+    'A nagy tojások is így tanultak! 🐔📖',
+    'Szusszanj, és vágj bele újra! 😤🥚'
 ];
 
 // Get random encouragement message
