@@ -13,6 +13,17 @@
             <div class="hero-title" id="heroTitle"></div>
         </div>
 
+        <!-- User Selector -->
+        <div class="user-selector">
+            <label for="currentUserInput">👤 Játékos:</label>
+            <div class="user-input-row">
+                <input type="text" id="currentUserInput" class="config-select"
+                       placeholder="Írd be a nevedet..." maxlength="30"
+                       list="knownUsers" autocomplete="off">
+                <datalist id="knownUsers"></datalist>
+            </div>
+        </div>
+
         <!-- Mascot character -->
         <div id="mascotWrapper" class="mascot-wrapper">
             <div id="mascot"></div>
@@ -138,22 +149,44 @@
             });
         });
 
-        // Display hero title and mascot for the current player
-        const stats = getPlayerStats(localStorage.getItem('playerName'));
-        const title = getHeroTitle(stats.totalPoints);
-        if (title) {
-            document.getElementById('heroTitle').textContent = `⭐ ${title} ⭐`;
+        // Populate the known-users datalist from stored task stats
+        function populateKnownUsers() {
+            const datalist = document.getElementById('knownUsers');
+            datalist.innerHTML = '';
+            getAllUsers().forEach(user => {
+                const opt = document.createElement('option');
+                opt.value = user;
+                datalist.appendChild(opt);
+            });
         }
 
-        // Render mascot
-        const tier = getMascotTier(stats.totalPoints);
-        renderMascot('mascot', tier);
+        // Update the hero title, mascot and regression message for the given player
+        function updatePlayerDisplay(playerName) {
+            const name = (playerName && playerName.trim()) || 'Névtelen';
+            localStorage.setItem('playerName', name);
 
-        // Show regression message if inactive
-        const regressionMsg = getMascotRegressionMessage();
-        if (regressionMsg) {
-            document.getElementById('mascotRegressionMsg').textContent = regressionMsg;
+            const stats = getPlayerStats(name);
+            const title = getHeroTitle(stats.totalPoints);
+            document.getElementById('heroTitle').textContent = title ? `⭐ ${title} ⭐` : '';
+
+            const tier = getMascotTier(stats.totalPoints, name);
+            renderMascot('mascot', tier);
+
+            const regressionMsg = getMascotRegressionMessage(name);
+            document.getElementById('mascotRegressionMsg').textContent = regressionMsg || '';
         }
+
+        // Initialise user selector
+        const currentUserInput = document.getElementById('currentUserInput');
+        const savedPlayerName = localStorage.getItem('playerName') || '';
+        currentUserInput.value = savedPlayerName;
+        populateKnownUsers();
+        updatePlayerDisplay(savedPlayerName);
+
+        currentUserInput.addEventListener('change', function() {
+            updatePlayerDisplay(this.value);
+            populateKnownUsers();
+        });
 
         function selectGame(gameType) {
             const modal = document.getElementById('configModal');
@@ -187,7 +220,7 @@
                 });
             }
 
-            // Pre-fill player name from last session
+            // Pre-fill player name from main page selector
             const savedName = localStorage.getItem('playerName') || '';
             document.getElementById('playerNameInput').value = savedName;
 
@@ -210,8 +243,9 @@
             const includeLowerNumbers = gameType === 'multiply' && document.getElementById('includeLowerNumbers').checked;
             const playerName = document.getElementById('playerNameInput').value.trim() || 'Névtelen';
 
-            // Persist player name for future sessions
+            // Persist player name and sync main page selector
             localStorage.setItem('playerName', playerName);
+            document.getElementById('currentUserInput').value = playerName;
 
             // Store configuration and navigate to game
             localStorage.setItem('currentGame', JSON.stringify({

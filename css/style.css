@@ -121,6 +121,30 @@ body {
     50% { transform: scale(1.05); }
 }
 
+/* User Selector */
+.user-selector {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.user-selector label {
+    display: block;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.user-input-row {
+    display: flex;
+    justify-content: center;
+}
+
+.user-input-row .config-select {
+    max-width: 320px;
+    text-align: center;
+}
+
 /* Theme Selector */
 .theme-selector {
     display: flex;

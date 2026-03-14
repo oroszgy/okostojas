@@ -3,7 +3,7 @@
 // Map hero title index to mascot tier
 // Tier 0: plain egg, 1: sprout, 2: crack+sprout, 3: eyes+smile,
 // 4: sunglasses, 5-6: viking helmet, 7-8: skater cap, 9: crown
-function getMascotTier(totalPoints) {
+function getMascotTier(totalPoints, playerName) {
     let baseTier = 0;
     for (let i = HERO_TITLES.length - 1; i >= 0; i--) {
         if (HERO_TITLES[i].title && totalPoints >= HERO_TITLES[i].points) {
@@ -13,7 +13,7 @@ function getMascotTier(totalPoints) {
     }
 
     // Apply regression for inactivity: penalty starts at 4+ days without practice
-    const days = getDaysSinceLastPractice();
+    const days = getDaysSinceLastPractice(playerName);
     if (days !== null && days >= 4) {
         const penalty = Math.floor((days - 2) / 2);
         baseTier = Math.max(0, baseTier - penalty);
@@ -23,8 +23,8 @@ function getMascotTier(totalPoints) {
 }
 
 // Return a regression warning message if the player has been inactive, or null
-function getMascotRegressionMessage() {
-    const days = getDaysSinceLastPractice();
+function getMascotRegressionMessage(playerName) {
+    const days = getDaysSinceLastPractice(playerName);
     if (days === null || days < 3) return null;
     // Penalty formula: Math.floor((days - 2) / 2), so at days=3 penalty is still 0
     const penalty = Math.floor((days - 2) / 2);

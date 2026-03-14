@@ -5,43 +5,60 @@ const STATS_KEY = 'mathGameStats';
 const TASK_STATS_KEY = 'mathGameTaskStats';
 const LAST_PRACTICE_KEY = 'mathGameLastPractice';
 
-// Get the timestamp (ms) of the last practice session, or null if never
-function getLastPracticeTimestamp() {
+// Get the timestamp (ms) of the last practice session for a user, or null if never
+function getLastPracticeTimestamp(playerName) {
+    const user = normaliseUser(playerName);
     const val = localStorage.getItem(LAST_PRACTICE_KEY);
-    if (!val) {
+    if (!val) return null;
+
+    try {
+        const parsed = JSON.parse(val);
+        // New per-user format: { userName: timestampMs }
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+            const ts = parsed[user];
+            if (!ts) return null;
+            const num = parseInt(ts, 10);
+            return Number.isFinite(num) ? num : null;
+        }
+        // Old format (single integer string) — cannot attribute to a user; discard
+        return null;
+    } catch (e) {
+        // Old format: plain integer string
         return null;
     }
-
-    const parsed = parseInt(val, 10);
-
-    if (!Number.isFinite(parsed)) {
-        // Stored value is corrupted or invalid; clear it and treat as no practice
-        localStorage.removeItem(LAST_PRACTICE_KEY);
-        return null;
-    }
-
-    return parsed;
 }
 
-// Record the current time as the last practice timestamp
-function setLastPracticeTimestamp() {
+// Record the current time as the last practice timestamp for a user
+function setLastPracticeTimestamp(playerName) {
+    const user = normaliseUser(playerName);
+    const val = localStorage.getItem(LAST_PRACTICE_KEY);
+    let allTimestamps = {};
+
+    if (val) {
+        try {
+            const parsed = JSON.parse(val);
+            if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+                allTimestamps = parsed;
+            }
+            // Old flat format: discard and start fresh per-user structure
+        } catch (e) {
+            // Old plain-integer format: discard
+        }
+    }
+
+    allTimestamps[user] = Date.now();
     try {
-        localStorage.setItem(LAST_PRACTICE_KEY, Date.now().toString());
+        localStorage.setItem(LAST_PRACTICE_KEY, JSON.stringify(allTimestamps));
     } catch (e) {
         console.error('Error saving last practice timestamp:', e);
     }
 }
 
-// Return whole days since last practice, or null if no practice recorded
-function getDaysSinceLastPractice() {
-    const last = getLastPracticeTimestamp();
+// Return whole days since last practice for a user, or null if no practice recorded
+function getDaysSinceLastPractice(playerName) {
+    const last = getLastPracticeTimestamp(playerName);
     if (last === null) return null;
     return Math.floor((Date.now() - last) / (1000 * 60 * 60 * 24));
-}
-
-// Helper: normalise a player name for use as a storage key
-function normaliseUser(playerName) {
-    return (playerName && playerName.trim()) || 'Névtelen';
 }
 
 // Helper: normalise a player name for use as a storage key
@@ -168,7 +185,7 @@ function updateStatistics(newScore, gameType, playerName) {
         stats[gameType].bestScore = Math.max(stats[gameType].bestScore, newScore);
     }
     
-    setLastPracticeTimestamp();
+    setLastPracticeTimestamp(playerName);
 
     try {
         localStorage.setItem(STATS_KEY, JSON.stringify(allStats));
