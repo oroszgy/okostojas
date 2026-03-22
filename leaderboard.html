@@ -70,6 +70,10 @@
                 <div class="stat-card">
                     <div class="stat-label">Következő cím</div>
                     <div class="stat-value" id="nextTitle" style="font-size: 1em;">-</div>
+                    <div class="level-progress-label" id="nextTitleLabel" style="display:none; margin-top:6px;"></div>
+                    <div class="level-progress-bar-bg" id="nextTitleBarBg" style="display:none; margin-top:6px; max-width:100%;">
+                        <div class="level-progress-bar-fill" id="nextTitleFill" style="width:0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -160,22 +164,24 @@
         function displayStatistics() {
             const currentPlayer = localStorage.getItem('playerName') || 'Névtelen';
             const stats = getPlayerStats(currentPlayer);
-            
+
             document.getElementById('totalGames').textContent = stats.totalGames;
             document.getElementById('multiplyBest').textContent = stats.multiply.bestScore;
             document.getElementById('addBest').textContent = stats.add.bestScore;
 
-            // Next hero title progress
-            const currentPoints = stats.totalPoints;
-            let nextTitleText = '🏆 Legmagasabb cím!';
-            for (let i = 0; i < HERO_TITLES.length; i++) {
-                if (HERO_TITLES[i].points > currentPoints) {
-                    const needed = HERO_TITLES[i].points - currentPoints;
-                    nextTitleText = `${HERO_TITLES[i].title} (még ${needed} pont)`;
-                    break;
-                }
+            // Next hero title progress using shared helper
+            const progress = getProgressToNextTitle(stats.totalPoints);
+            if (progress.nextTitle) {
+                document.getElementById('nextTitle').textContent = progress.nextTitle;
+                document.getElementById('nextTitleLabel').textContent =
+                    `${progress.percent}% — még ${progress.needed.toLocaleString('hu-HU')} pont`;
+            } else {
+                document.getElementById('nextTitle').textContent = '🏆 Legmagasabb cím!';
+                document.getElementById('nextTitleLabel').textContent = '100%';
             }
-            document.getElementById('nextTitle').textContent = nextTitleText;
+            document.getElementById('nextTitleFill').style.width = `${progress.percent}%`;
+            document.getElementById('nextTitleLabel').style.display = '';
+            document.getElementById('nextTitleBarBg').style.display = '';
 
             // Show whose stats are displayed
             const statsSection = document.querySelector('.stats-section h2');

@@ -10,7 +10,16 @@
     <div class="container">
         <div class="header">
             <h1>🥚 OkosTojás 🥚</h1>
-            <div class="hero-title" id="heroTitle"></div>
+            <div class="hero-title-block">
+                <div class="hero-title" id="heroTitle"></div>
+                <div id="heroProgressWrap" class="level-progress-wrap" style="display:none">
+                    <div class="level-progress-label" id="heroProgressLabel"></div>
+                    <div class="level-progress-bar-bg">
+                        <div class="level-progress-bar-fill" id="heroProgressFill" style="width:0%"></div>
+                    </div>
+                    <div class="level-progress-text" id="heroProgressText"></div>
+                </div>
+            </div>
         </div>
 
         <!-- User Selector -->
@@ -225,6 +234,19 @@
             const stats = getPlayerStats(name);
             const title = getHeroTitle(stats.totalPoints);
             document.getElementById('heroTitle').textContent = title ? `⭐ ${title} ⭐` : '';
+
+            const progress = getProgressToNextTitle(stats.totalPoints);
+            const wrap = document.getElementById('heroProgressWrap');
+            if (progress.nextTitle) {
+                document.getElementById('heroProgressLabel').textContent = `Következő cím: ${progress.nextTitle}`;
+                document.getElementById('heroProgressFill').style.width = `${progress.percent}%`;
+                document.getElementById('heroProgressText').textContent = `még ${progress.needed.toLocaleString('hu-HU')} pont`;
+            } else {
+                document.getElementById('heroProgressLabel').textContent = 'Elérted a legmagasabb szintet! 👑';
+                document.getElementById('heroProgressFill').style.width = '100%';
+                document.getElementById('heroProgressText').textContent = '';
+            }
+            wrap.style.display = '';
 
             const tier = getMascotTier(stats.totalPoints, name);
             renderMascot('mascot', tier);

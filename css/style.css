@@ -1312,3 +1312,28 @@ body {
     color: #b91c1c;
 }
 
+
+/* ===== Level Progress Bar ===== */
+.hero-title-block { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 10px; }
+
+.level-progress-wrap { margin-top: 6px; text-align: center; width: 100%; }
+.level-progress-label { font-size: 0.82em; color: #666; margin-bottom: 4px; }
+.level-progress-bar-bg { width: 100%; max-width: 340px; margin: 0 auto; height: 14px; background: rgba(0,0,0,0.1); border-radius: 7px; overflow: hidden; }
+.level-progress-bar-fill { height: 100%; border-radius: 7px; background: linear-gradient(90deg, #ffd700 0%, #ff6b00 100%); transition: width 0.6s ease; }
+.level-progress-text { font-size: 0.78em; color: #888; margin-top: 3px; }
+
+/* Result modal variant */
+.result-level-progress { margin: 14px 0 6px; padding: 12px; background: rgba(255,215,0,0.1); border-radius: 12px; border: 2px solid rgba(255,215,0,0.4); text-align: center; }
+.result-total-points { font-size: 1.05em; font-weight: bold; color: #ff6b00; margin-bottom: 8px; }
+.result-level-progress .level-progress-bar-bg { height: 18px; border-radius: 9px; max-width: 100%; }
+.result-level-progress .level-progress-bar-fill { height: 100%; border-radius: 9px; background: linear-gradient(90deg, #ffd700 0%, #ff6b00 100%); transition: width 0.8s ease; }
+
+/* Theme variants */
+.theme-girl .level-progress-bar-fill,
+.theme-girl .result-level-progress .level-progress-bar-fill { background: linear-gradient(90deg, #FFADFF 0%, #c239b3 100%); }
+.theme-boy .level-progress-bar-fill,
+.theme-boy .result-level-progress .level-progress-bar-fill { background: linear-gradient(90deg, #6eb5ff 0%, #2c5aa0 100%); }
+
+@media (max-width: 480px) {
+    .level-progress-bar-bg { max-width: 260px; }
+}

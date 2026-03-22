@@ -456,12 +456,28 @@ function endGame() {
 
     // Check for new hero title
     const oldStats = getPlayerStats(gameConfig.playerName);
-    const newHeroTitle = checkNewHeroTitle(oldStats.totalPoints, oldStats.totalPoints + score);
-    
+    const newTotalPoints = oldStats.totalPoints + Math.max(0, score);
+    const newHeroTitle = checkNewHeroTitle(oldStats.totalPoints, newTotalPoints);
+
     if (newHeroTitle) {
         document.getElementById('newHeroTitle').textContent = `🎉 Új cím feloldva: ${newHeroTitle}! 🎉`;
     }
-    
+
+    // Show cumulative level progress
+    const progress = getProgressToNextTitle(newTotalPoints);
+    document.getElementById('resultTotalPoints').textContent =
+        `Összes pontod: ${newTotalPoints.toLocaleString('hu-HU')} pont`;
+    if (progress.nextTitle) {
+        document.getElementById('resultProgressLabel').textContent = `Következő cím: ${progress.nextTitle}`;
+        document.getElementById('resultProgressFill').style.width = `${progress.percent}%`;
+        document.getElementById('resultProgressText').textContent = `még ${progress.needed.toLocaleString('hu-HU')} pont`;
+    } else {
+        document.getElementById('resultProgressLabel').textContent = 'Elérted a legmagasabb szintet! 👑';
+        document.getElementById('resultProgressFill').style.width = '100%';
+        document.getElementById('resultProgressText').textContent = '';
+    }
+    document.getElementById('resultLevelProgress').style.display = '';
+
     // Pre-fill player name from game config (set before game started)
     const savedName = gameConfig.playerName || localStorage.getItem('playerName') || '';
     document.getElementById('playerName').value = savedName;

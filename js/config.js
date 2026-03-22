@@ -1,18 +1,18 @@
 // Configuration and utility functions
 
 // Hero titles based on total points
-// Evenly spaced at 500-pt intervals so each tier requires ~40 correct answers
+// Non-linear thresholds: first level ~2-3 games, last level ~58+ games at 2000–2500 pts/game
 const HERO_TITLES = [
-    { points: 0, title: null },
-    { points: 500, title: 'Tojáscsíra 🌱' },
-    { points: 1000, title: 'Repedező Tojás 🥚' },
-    { points: 1500, title: 'Frissen Kelt Számolós 🐣' },
-    { points: 2000, title: 'Okos Tojás 🧠' },
-    { points: 2500, title: 'Számolásmester 🔢' },
-    { points: 3000, title: 'Tojászseni 💡' },
-    { points: 3500, title: 'Tojásvarázsló 🪄' },
-    { points: 4000, title: 'Aranytojás 🥇' },
-    { points: 4500, title: 'A Nagy Tojás 👑' }
+    { points: 0,      title: null },
+    { points: 5000,   title: 'Tojáscsíra 🌱' },
+    { points: 12000,  title: 'Repedező Tojás 🥚' },
+    { points: 22000,  title: 'Frissen Kelt Számolós 🐣' },
+    { points: 35000,  title: 'Okos Tojás 🧠' },
+    { points: 50000,  title: 'Számolásmester 🔢' },
+    { points: 68000,  title: 'Tojászseni 💡' },
+    { points: 90000,  title: 'Tojásvarázsló 🪄' },
+    { points: 115000, title: 'Aranytojás 🥇' },
+    { points: 145000, title: 'A Nagy Tojás 👑' }
 ];
 
 // Get hero title based on points
@@ -36,6 +36,27 @@ function checkNewHeroTitle(oldPoints, newPoints) {
         return newTitle;
     }
     return null;
+}
+
+// Get progress toward the next hero title.
+// Returns { nextTitle, needed, percent, currentTitle } for use in all progress bars.
+// When max title reached: nextTitle = null, percent = 100, needed = 0.
+function getProgressToNextTitle(points) {
+    for (let i = 1; i < HERO_TITLES.length; i++) {
+        if (points < HERO_TITLES[i].points) {
+            const prevPoints = HERO_TITLES[i - 1].points;
+            const tierSize   = HERO_TITLES[i].points - prevPoints;
+            const gained     = points - prevPoints;
+            const percent    = Math.min(100, Math.floor((gained / tierSize) * 100));
+            return {
+                currentTitle: HERO_TITLES[i - 1].title,
+                nextTitle:    HERO_TITLES[i].title,
+                needed:       HERO_TITLES[i].points - points,
+                percent
+            };
+        }
+    }
+    return { currentTitle: HERO_TITLES[HERO_TITLES.length - 1].title, nextTitle: null, needed: 0, percent: 100 };
 }
 
 // Encouragement messages for correct answers
