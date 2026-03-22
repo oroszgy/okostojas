@@ -77,24 +77,10 @@
                 </div>
             </div>
             <div class="global-settings-row">
-                <div class="config-group">
-                    <label for="globalBase">Szorzás alapszáma:</label>
-                    <select id="globalBase" class="config-select">
-                        <option value="2">2-es szorzótábla</option>
-                        <option value="3">3-as szorzótábla</option>
-                        <option value="4">4-es szorzótábla</option>
-                        <option value="5" selected>5-ös szorzótábla</option>
-                        <option value="6">6-os szorzótábla</option>
-                        <option value="7">7-es szorzótábla</option>
-                        <option value="8">8-as szorzótábla</option>
-                        <option value="9">9-es szorzótábla</option>
-                        <option value="10">10-es szorzótábla</option>
-                    </select>
-                </div>
                 <div class="config-group" style="display:flex; align-items:flex-end; padding-bottom:4px">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="globalIncludeLower">
-                        Kisebb számok is (pl. 5-nél: 2–5)
+                        <input type="checkbox" id="globalIncludeLower" checked>
+                        Kisebb szorzók is (pl. max 5-nél: 2–5)
                     </label>
                 </div>
             </div>
@@ -204,15 +190,12 @@
         (function() {
             const maxVal = document.getElementById('globalMaxValue');
             const maxDiv = document.getElementById('globalMaxDivisor');
-            const base  = document.getElementById('globalBase');
             const incl  = document.getElementById('globalIncludeLower');
             maxVal.value = localStorage.getItem('globalMaxValue') || '20';
             maxDiv.value = localStorage.getItem('globalMaxDivisor') || '5';
-            base.value   = localStorage.getItem('globalBase') || '5';
-            incl.checked = localStorage.getItem('globalIncludeLower') === '1';
+            incl.checked = localStorage.getItem('globalIncludeLower') !== '0';
             maxVal.addEventListener('change', () => localStorage.setItem('globalMaxValue', maxVal.value));
             maxDiv.addEventListener('change', () => localStorage.setItem('globalMaxDivisor', maxDiv.value));
-            base.addEventListener('change',   () => localStorage.setItem('globalBase', base.value));
             incl.addEventListener('change',   () => localStorage.setItem('globalIncludeLower', incl.checked ? '1' : '0'));
         })();
 
@@ -361,7 +344,7 @@
             localStorage.setItem('currentGame', JSON.stringify({
                 type: gameType,
                 config: gameType === 'multiply'
-                    ? parseInt(document.getElementById('globalBase').value)
+                    ? getGlobalMaxDivisor()
                     : getGlobalMaxValue(),
                 numQuestions: 20,
                 includeLowerNumbers: gameType === 'multiply' && document.getElementById('globalIncludeLower').checked,
@@ -408,7 +391,7 @@
             const gameType = document.getElementById('bossGameType').value;
             const playerName = localStorage.getItem('playerName') || 'Névtelen';
             const config = gameType === 'multiply'
-                ? parseInt(document.getElementById('globalBase').value)
+                ? getGlobalMaxDivisor()
                 : getGlobalMaxValue();
             const includeLower = gameType === 'multiply' && document.getElementById('globalIncludeLower').checked;
 
