@@ -142,9 +142,10 @@ function generateMultiplyQuestion() {
         ? Array.from({ length: maxBase - 1 }, (_, i) => i + 2)  // [2 .. maxBase]
         : [maxBase];
 
+    const maxMultiplier = gameConfig.maxMultiplier || 10;
     const choices = [];
     for (const b of bases) {
-        for (let i = 1; i <= 10; i++) {
+        for (let i = 1; i <= maxMultiplier; i++) {
             const key = `multiply:${b}:${i}`;
             choices.push({ base: b, multiplier: i, weight: getTaskWeight(taskStats[key]) });
         }

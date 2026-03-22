@@ -195,6 +195,25 @@ body {
     background: linear-gradient(135deg, #3a7fd0 0%, #1c4a90 100%);
 }
 
+/* Global Difficulty Settings */
+.global-settings {
+    margin-bottom: 25px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 15px;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+}
+
+.global-settings-row {
+    display: flex;
+    gap: 15px;
+}
+
+.global-settings-row .config-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
 /* Theme Selector */
 .theme-selector {
     display: flex;

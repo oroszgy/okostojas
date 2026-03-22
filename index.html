@@ -48,6 +48,36 @@
             <button class="theme-btn" data-theme="boy">👦 Fiú Téma</button>
         </div>
 
+        <!-- Global Difficulty Settings -->
+        <div class="global-settings">
+            <div class="global-settings-row">
+                <div class="config-group">
+                    <label for="globalMaxValue">Számok felső határa:</label>
+                    <select id="globalMaxValue" class="config-select">
+                        <option value="10">legfeljebb 10</option>
+                        <option value="20" selected>legfeljebb 20</option>
+                        <option value="50">legfeljebb 50</option>
+                        <option value="100">legfeljebb 100</option>
+                        <option value="200">legfeljebb 200</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label for="globalMaxDivisor">Szorzó/osztó max.:</label>
+                    <select id="globalMaxDivisor" class="config-select">
+                        <option value="2">legfeljebb 2</option>
+                        <option value="3">legfeljebb 3</option>
+                        <option value="4">legfeljebb 4</option>
+                        <option value="5" selected>legfeljebb 5</option>
+                        <option value="6">legfeljebb 6</option>
+                        <option value="7">legfeljebb 7</option>
+                        <option value="8">legfeljebb 8</option>
+                        <option value="9">legfeljebb 9</option>
+                        <option value="10">legfeljebb 10</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <!-- Game Type Selection -->
         <div class="menu">
             <button class="game-btn" onclick="selectGame('multiply')">
@@ -92,16 +122,6 @@
                     <select id="configValue" class="config-select"></select>
                 </div>
 
-                <div class="config-group" id="maxMultiplierGroup" style="display:none">
-                    <label for="maxMultiplierValue">Szorzó/osztó max. értéke:</label>
-                    <select id="maxMultiplierValue" class="config-select">
-                        <option value="2">legfeljebb 2</option>
-                        <option value="3">legfeljebb 3</option>
-                        <option value="5" selected>legfeljebb 5</option>
-                        <option value="10">legfeljebb 10</option>
-                    </select>
-                </div>
-
                 <div class="config-group" id="lowerNumbersGroup" style="display:none">
                     <label class="checkbox-label">
                         <input type="checkbox" id="includeLowerNumbers">
@@ -136,19 +156,9 @@
                 </div>
 
                 <!-- Difficulty -->
-                <div class="config-group">
+                <div class="config-group" id="bossDifficultyGroup">
                     <label for="bossDifficulty" id="bossDifficultyLabel">Alapszám:</label>
                     <select id="bossDifficulty" class="config-select"></select>
-                </div>
-
-                <div class="config-group" id="bossMaxMultiplierGroup" style="display:none">
-                    <label for="bossMaxMultiplier">Szorzó/osztó max. értéke:</label>
-                    <select id="bossMaxMultiplier" class="config-select">
-                        <option value="2">legfeljebb 2</option>
-                        <option value="3">legfeljebb 3</option>
-                        <option value="5" selected>legfeljebb 5</option>
-                        <option value="10">legfeljebb 10</option>
-                    </select>
                 </div>
 
                 <div class="config-group" id="bossLowerNumbersGroup" style="display:none">
@@ -204,6 +214,16 @@
         // Initialize theme
         const savedTheme = localStorage.getItem('theme') || 'girl';
         document.body.className = `theme-${savedTheme}`;
+
+        // Restore and persist global difficulty settings
+        (function() {
+            const maxVal = document.getElementById('globalMaxValue');
+            const maxDiv = document.getElementById('globalMaxDivisor');
+            maxVal.value = localStorage.getItem('globalMaxValue') || '20';
+            maxDiv.value = localStorage.getItem('globalMaxDivisor') || '5';
+            maxVal.addEventListener('change', () => localStorage.setItem('globalMaxValue', maxVal.value));
+            maxDiv.addEventListener('change', () => localStorage.setItem('globalMaxDivisor', maxDiv.value));
+        })();
 
         // Theme selection
         document.querySelectorAll('.theme-btn').forEach(btn => {
@@ -332,78 +352,72 @@
         });
 
         function selectGame(gameType) {
-            const modal = document.getElementById('configModal');
-            const configValue = document.getElementById('configValue');
-            const configLabel = document.getElementById('configLabel');
-            const configTitle = document.getElementById('configTitle');
-
-            // Clear previous options
-            configValue.innerHTML = '';
-
             if (gameType === 'multiply') {
-                configTitle.textContent = 'Szorzás / Osztás Beállítás';
-                configLabel.textContent = 'Válassz alapszámot:';
+                const modal = document.getElementById('configModal');
+                const configValue = document.getElementById('configValue');
+                configValue.innerHTML = '';
+                document.getElementById('configTitle').textContent = 'Szorzás / Osztás Beállítás';
+                document.getElementById('configLabel').textContent = 'Válassz alapszámot:';
                 for (let i = 2; i <= 10; i++) {
                     const option = document.createElement('option');
                     option.value = i;
                     option.textContent = `${i}-es szorzótábla`;
                     configValue.appendChild(option);
                 }
-                document.getElementById('maxMultiplierGroup').style.display = 'none';
                 document.getElementById('lowerNumbersGroup').style.display = '';
                 document.getElementById('includeLowerNumbers').checked = false;
-            } else if (gameType === 'precedence') {
-                document.getElementById('maxMultiplierGroup').style.display = '';
-                document.getElementById('lowerNumbersGroup').style.display = 'none';
-                configTitle.textContent = 'Műveleti Sorrend Beállítás';
-                configLabel.textContent = 'Válassz felső határt:';
-                [10, 20, 50, 100].forEach(num => {
-                    const option = document.createElement('option');
-                    option.value = num;
-                    option.textContent = `Számok 0-${num} között`;
-                    configValue.appendChild(option);
-                });
+                modal.dataset.gameType = gameType;
+                modal.style.display = 'flex';
             } else {
-                document.getElementById('maxMultiplierGroup').style.display = 'none';
-                document.getElementById('lowerNumbersGroup').style.display = 'none';
-                configTitle.textContent = 'Összeadás / Kivonás Beállítás';
-                configLabel.textContent = 'Válassz felső határt:';
-                [10, 20, 50, 100].forEach(num => {
-                    const option = document.createElement('option');
-                    option.value = num;
-                    option.textContent = `Számok 0-${num} között`;
-                    configValue.appendChild(option);
-                });
+                // add and precedence use only global settings — start immediately
+                startGameDirect(gameType);
             }
-
-            // Store game type for later
-            modal.dataset.gameType = gameType;
-            modal.style.display = 'flex';
         }
 
         function closeModal() {
             document.getElementById('configModal').style.display = 'none';
         }
 
+        function getGlobalMaxValue() {
+            return parseInt(document.getElementById('globalMaxValue').value);
+        }
+
+        function getGlobalMaxDivisor() {
+            return parseInt(document.getElementById('globalMaxDivisor').value);
+        }
+
+        function startGameDirect(gameType) {
+            const playerName = getCurrentPlayerName();
+            localStorage.setItem('playerName', playerName);
+            populateUserSelect();
+            localStorage.setItem('currentGame', JSON.stringify({
+                type: gameType,
+                config: getGlobalMaxValue(),
+                numQuestions: 20,
+                includeLowerNumbers: false,
+                maxMultiplier: getGlobalMaxDivisor(),
+                playerName: playerName
+            }));
+            window.location.href = 'game.html';
+        }
+
         function startGame() {
             const modal = document.getElementById('configModal');
             const gameType = modal.dataset.gameType;
             const configValue = document.getElementById('configValue').value;
-            const includeLowerNumbers = gameType === 'multiply' && document.getElementById('includeLowerNumbers').checked;
-            const maxMultiplier = gameType === 'precedence' ? parseInt(document.getElementById('maxMultiplierValue').value) : undefined;
+            const includeLowerNumbers = document.getElementById('includeLowerNumbers').checked;
             const playerName = getCurrentPlayerName();
 
             // Persist player name and refresh selector
             localStorage.setItem('playerName', playerName);
             populateUserSelect();
 
-            // Store configuration and navigate to game
             localStorage.setItem('currentGame', JSON.stringify({
                 type: gameType,
                 config: parseInt(configValue),
                 numQuestions: 20,
                 includeLowerNumbers: includeLowerNumbers,
-                maxMultiplier: maxMultiplier,
+                maxMultiplier: getGlobalMaxDivisor(),
                 playerName: playerName
             }));
 
@@ -448,57 +462,42 @@
 
         function updateBossDifficultyOptions() {
             const gameType = document.getElementById('bossGameType').value;
+            const diffGroup = document.getElementById('bossDifficultyGroup');
             const diffSelect = document.getElementById('bossDifficulty');
-            const label = document.getElementById('bossDifficultyLabel');
             const lowerGroup = document.getElementById('bossLowerNumbersGroup');
 
             diffSelect.innerHTML = '';
             if (gameType === 'multiply') {
-                label.textContent = 'Alapszám:';
+                document.getElementById('bossDifficultyLabel').textContent = 'Alapszám:';
                 for (let i = 2; i <= 10; i++) {
                     const opt = document.createElement('option');
                     opt.value = i;
                     opt.textContent = `${i}-es szorzótábla`;
                     diffSelect.appendChild(opt);
                 }
-                document.getElementById('bossMaxMultiplierGroup').style.display = 'none';
+                diffGroup.style.display = '';
                 lowerGroup.style.display = '';
-            } else if (gameType === 'precedence') {
-                label.textContent = 'Felső határ:';
-                [10, 20, 50, 100].forEach(num => {
-                    const opt = document.createElement('option');
-                    opt.value = num;
-                    opt.textContent = `Számok 0-${num} között`;
-                    diffSelect.appendChild(opt);
-                });
-                document.getElementById('bossMaxMultiplierGroup').style.display = '';
-                lowerGroup.style.display = 'none';
             } else {
-                label.textContent = 'Felső határ:';
-                [10, 20, 50, 100].forEach(num => {
-                    const opt = document.createElement('option');
-                    opt.value = num;
-                    opt.textContent = `Számok 0-${num} között`;
-                    diffSelect.appendChild(opt);
-                });
-                document.getElementById('bossMaxMultiplierGroup').style.display = 'none';
+                // add/precedence: config and maxMultiplier come from global settings
+                diffGroup.style.display = 'none';
                 lowerGroup.style.display = 'none';
             }
         }
 
         function startBossGame() {
             const gameType = document.getElementById('bossGameType').value;
-            const config = parseInt(document.getElementById('bossDifficulty').value);
-            const includeLower = gameType === 'multiply' && document.getElementById('bossIncludeLower').checked;
-            const maxMultiplier = gameType === 'precedence' ? parseInt(document.getElementById('bossMaxMultiplier').value) : undefined;
             const playerName = localStorage.getItem('playerName') || 'Névtelen';
+            const config = gameType === 'multiply'
+                ? parseInt(document.getElementById('bossDifficulty').value)
+                : getGlobalMaxValue();
+            const includeLower = gameType === 'multiply' && document.getElementById('bossIncludeLower').checked;
 
             localStorage.setItem('currentGame', JSON.stringify({
                 type: gameType,
                 config: config,
                 numQuestions: 20,
                 includeLowerNumbers: includeLower,
-                maxMultiplier: maxMultiplier,
+                maxMultiplier: getGlobalMaxDivisor(),
                 mode: 'boss',
                 bossId: selectedBossId,
                 playerName: playerName
