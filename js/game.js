@@ -12,6 +12,7 @@ let correctAnswers = 0;
 let startTime = null;
 let timerInterval = null;
 let questions = [];
+let scoreSaved = false;
 
 // Boss battle state
 let bossHP = 10;
@@ -676,10 +677,17 @@ function endGame() {
         bossBanner.style.display = '';
     }
 
-    // Check for new hero title
+    // Check for new hero title (boss battles never change totalPoints)
     const oldStats = getPlayerStats(gameConfig.playerName);
-    const newTotalPoints = oldStats.totalPoints + Math.max(0, score);
-    const newHeroTitle = checkNewHeroTitle(oldStats.totalPoints, newTotalPoints);
+    let newHeroTitle = null;
+    let newTotalPoints;
+
+    if (gameConfig.mode === 'boss') {
+        newTotalPoints = oldStats.totalPoints;
+    } else {
+        newTotalPoints = oldStats.totalPoints + Math.max(0, score);
+        newHeroTitle = checkNewHeroTitle(oldStats.totalPoints, newTotalPoints);
+    }
 
     if (newHeroTitle) {
         document.getElementById('newHeroTitle').textContent = `🎉 Új cím feloldva: ${newHeroTitle}! 🎉`;
@@ -700,34 +708,41 @@ function endGame() {
     }
     document.getElementById('resultLevelProgress').style.display = '';
 
+    // Level-up boss prompt: show only for normal games that unlocked a new title
+    document.getElementById('bossPrompt').style.display =
+        (newHeroTitle && gameConfig.mode !== 'boss') ? '' : 'none';
+
+    // Boss mode: hide name input (score not saved), change button label
+    const nameGroup = document.getElementById('playerNameGroup');
+    const saveBtn = document.getElementById('saveReturnBtn');
+    if (gameConfig.mode === 'boss') {
+        nameGroup.style.display = 'none';
+        saveBtn.textContent = 'Főmenü 🏠';
+    } else {
+        nameGroup.style.display = '';
+        saveBtn.textContent = 'Mentés és Főmenü';
+    }
+
     // Pre-fill player name from game config (set before game started)
     const savedName = gameConfig.playerName || localStorage.getItem('playerName') || '';
     document.getElementById('playerName').value = savedName;
-    
+
     // Show result modal
     document.getElementById('resultModal').style.display = 'flex';
 }
 
 // Save and return to menu
 function saveAndReturn() {
-    const playerName = document.getElementById('playerName').value.trim();
-    
-    if (playerName) {
-        localStorage.setItem('playerName', playerName);
+    const playerName = document.getElementById('playerName').value.trim() ||
+        gameConfig.playerName || 'Névtelen';
+    if (playerName) localStorage.setItem('playerName', playerName);
+
+    // Boss battles never affect the leaderboard or totalPoints
+    if (gameConfig.mode !== 'boss' && !scoreSaved) {
+        scoreSaved = true;
+        saveScore(playerName, score, gameConfig.type, correctAnswers, questions.length);
     }
-    
-    // Save score to leaderboard; in boss mode use totalAttempts so accuracy is
-    // computed from actual attempts, not the pre-generated question buffer (60).
-    const totalAnswered = gameConfig.mode === 'boss' ? totalAttempts : questions.length;
-    saveScore(
-        playerName,
-        score,
-        gameConfig.type,
-        correctAnswers,
-        totalAnswered
-    );
-    
-    // Return to main menu
+
     window.location.href = 'index.html';
 }
 
@@ -740,6 +755,7 @@ function playAgain() {
     bossHP = 10;
     consecutiveCorrect = 0;
     totalAttempts = 0;
+    scoreSaved = false;
     
     // Update score display
     document.getElementById('score').textContent = score;

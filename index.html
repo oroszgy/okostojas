@@ -10,6 +10,7 @@
     <div class="container">
         <div class="header">
             <h1>🥚 OkosTojás 🥚</h1>
+            <button class="info-btn" onclick="document.getElementById('infoModal').style.display='flex'" aria-label="Hogyan működik?">ℹ️</button>
             <div class="hero-title-block">
                 <div class="hero-title" id="heroTitle"></div>
                 <div id="heroProgressWrap" class="level-progress-wrap" style="display:none">
@@ -160,6 +161,37 @@
                 <div class="modal-buttons">
                     <button class="btn-primary" onclick="startBossGame()">Harc! ⚔️</button>
                     <button class="btn-secondary" onclick="closeBossModal()">Mégse</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Modal -->
+        <div id="infoModal" class="modal">
+            <div class="modal-content info-content">
+                <h2>ℹ️ Hogyan működik?</h2>
+                <div class="info-section">
+                    <h3>🎮 A játék</h3>
+                    <p>Válassz feladattípust és alapszámot, majd válaszolj 20 matematikai kérdésre!</p>
+                </div>
+                <div class="info-section">
+                    <h3>⭐ Pontok</h3>
+                    <p>Helyes válasz: <strong>100–200 pont</strong> (gyorsabb válasz = több pont)</p>
+                    <p>Hibás válasz: <strong>−20 pont</strong></p>
+                </div>
+                <div class="info-section">
+                    <h3>🏆 Szintek és címek</h3>
+                    <p>Az összesített pontjaid alapján új hőscímeket szerezhetsz. Az első cím 5 000 ponttól jár, a legmagasabb 145 000 ponttól!</p>
+                </div>
+                <div class="info-section">
+                    <h3>⚔️ Főellenség Harc</h3>
+                    <p>Ha szintet lépsz, küzdhetsz egy főellenséggel. Adj 10 egymás utáni helyes választ a legyőzéséhez! A főellenség harc nem változtatja meg a pontjaidat.</p>
+                </div>
+                <div class="info-section">
+                    <h3>🌱 Visszafejlődés</h3>
+                    <p>Ha 4+ napig nem gyakorolsz, a kabalád elveszíti kiegészítőit. Játssz rendszeresen!</p>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn-primary" onclick="document.getElementById('infoModal').style.display='none'">Értem! 👍</button>
                 </div>
             </div>
         </div>
@@ -481,6 +513,11 @@
 
         function showTaskStats() {
             window.location.href = 'tasks.html';
+        }
+
+        // Auto-open boss modal when redirected from a level-up celebration
+        if (new URLSearchParams(window.location.search).get('openBoss') === '1') {
+            openBossModal();
         }
     </script>
 </body>

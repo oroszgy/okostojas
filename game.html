@@ -110,13 +110,18 @@
                     <div class="level-progress-text" id="resultProgressText"></div>
                 </div>
 
-                <div class="config-group">
+                <div id="bossPrompt" class="boss-prompt-banner" style="display:none">
+                    <p>⚔️ Szintet léptél! Harcolj egy főellenséggel a cím megünnepléséhez!</p>
+                    <button class="btn-boss-challenge" onclick="goToBossChallenge()">⚔️ Főellenség Harc!</button>
+                </div>
+
+                <div class="config-group" id="playerNameGroup">
                     <label for="playerName">Add meg a neved:</label>
                     <input type="text" id="playerName" class="answer-input" placeholder="Neved">
                 </div>
 
                 <div class="modal-buttons">
-                    <button class="btn-primary" onclick="saveAndReturn()">Mentés és Főmenü</button>
+                    <button class="btn-primary" id="saveReturnBtn" onclick="saveAndReturn()">Mentés és Főmenü</button>
                     <button class="btn-secondary" onclick="playAgain()">Új Játék</button>
                 </div>
             </div>
@@ -130,5 +135,17 @@
     <script src="js/storage.js"></script>
     <script src="js/mascot.js"></script>
     <script src="js/game.js"></script>
+    <script>
+        function goToBossChallenge() {
+            const playerName = document.getElementById('playerName').value.trim() ||
+                gameConfig.playerName || 'Névtelen';
+            if (playerName) localStorage.setItem('playerName', playerName);
+            if (gameConfig.mode !== 'boss' && !scoreSaved) {
+                scoreSaved = true;
+                saveScore(playerName, score, gameConfig.type, correctAnswers, questions.length);
+            }
+            window.location.href = 'index.html?openBoss=1';
+        }
+    </script>
 </body>
 </html>

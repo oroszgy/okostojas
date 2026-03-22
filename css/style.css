@@ -1342,3 +1342,51 @@ body {
 @media (max-width: 480px) {
     .level-progress-bar-bg { max-width: 260px; }
 }
+
+/* ===== Boss prompt banner (level-up challenge) ===== */
+.boss-prompt-banner {
+    margin: 14px 0 6px;
+    padding: 14px;
+    background: rgba(255, 100, 0, 0.1);
+    border: 2px solid rgba(255, 100, 0, 0.4);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.boss-prompt-banner p {
+    margin: 0 0 10px;
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+.btn-boss-challenge {
+    background: linear-gradient(135deg, #ff6b00, #c43a00);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-boss-challenge:hover { opacity: 0.9; }
+
+/* ===== Info button & modal ===== */
+.info-btn {
+    background: none;
+    border: none;
+    font-size: 1.4em;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 4px 8px;
+    border-radius: 50%;
+    transition: opacity 0.2s;
+}
+
+.info-btn:hover { opacity: 1; }
+
+.info-content { max-width: 460px; text-align: left; }
+.info-section { margin-bottom: 14px; }
+.info-section h3 { margin: 0 0 4px; font-size: 1em; }
+.info-section p { margin: 2px 0; font-size: 0.9em; }
