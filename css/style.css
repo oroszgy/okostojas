@@ -99,6 +99,7 @@ body {
 .header {
     text-align: center;
     margin-bottom: 30px;
+    position: relative;
 }
 
 .header h1 {
@@ -970,6 +971,81 @@ body {
         padding: 14px 8px;
         font-size: 1.5em;
     }
+
+    /* ── Compact main screen ── */
+    .header {
+        margin-bottom: 12px;
+    }
+
+    .header h1 {
+        padding-right: 36px; /* avoid overlap with absolute info-btn */
+    }
+
+    .user-selector {
+        margin-bottom: 10px;
+    }
+
+    .user-selector label {
+        font-size: 1em;
+        margin-bottom: 4px;
+    }
+
+    .main-info-row {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 14px;
+        margin-bottom: 12px;
+    }
+
+    .mascot-wrapper {
+        flex-shrink: 0;
+        margin-bottom: 0;
+    }
+
+    .mascot-container,
+    .mascot-svg {
+        width: 90px;
+        height: 117px;
+    }
+
+    .theme-selector {
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 0;
+        align-self: center;
+    }
+
+    .theme-btn {
+        padding: 10px 14px;
+        font-size: 1em;
+    }
+
+    .menu {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .secondary-btn {
+        grid-column: span 2;
+        padding: 14px;
+        font-size: 1.1em;
+    }
+
+    .game-btn {
+        padding: 16px 10px;
+        font-size: 1em;
+    }
+
+    .game-btn .icon {
+        font-size: 1.4em;
+        margin-bottom: 6px;
+    }
+
+    .game-btn h2 {
+        font-size: 0.9em;
+    }
 }
 
 @media (max-width: 480px) {
@@ -983,10 +1059,6 @@ body {
 
     .question {
         font-size: 2em;
-    }
-
-    .theme-selector {
-        flex-direction: column;
     }
 
     .filter-buttons {
@@ -1097,6 +1169,14 @@ body {
     .new-player-row .new-player-input {
         max-width: 100%;
     }
+}
+
+/* ===== Main info row (mascot + theme selector) ===== */
+
+.main-info-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* ===== Mascot ===== */
@@ -1382,6 +1462,9 @@ body {
     padding: 4px 8px;
     border-radius: 50%;
     transition: opacity 0.2s;
+    position: absolute;
+    top: 4px;
+    right: 4px;
 }
 
 .info-btn:hover { opacity: 1; }
