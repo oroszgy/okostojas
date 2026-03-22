@@ -76,6 +76,28 @@
                     </select>
                 </div>
             </div>
+            <div class="global-settings-row">
+                <div class="config-group">
+                    <label for="globalBase">Szorzás alapszáma:</label>
+                    <select id="globalBase" class="config-select">
+                        <option value="2">2-es szorzótábla</option>
+                        <option value="3">3-as szorzótábla</option>
+                        <option value="4">4-es szorzótábla</option>
+                        <option value="5" selected>5-ös szorzótábla</option>
+                        <option value="6">6-os szorzótábla</option>
+                        <option value="7">7-es szorzótábla</option>
+                        <option value="8">8-as szorzótábla</option>
+                        <option value="9">9-es szorzótábla</option>
+                        <option value="10">10-es szorzótábla</option>
+                    </select>
+                </div>
+                <div class="config-group" style="display:flex; align-items:flex-end; padding-bottom:4px">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="globalIncludeLower">
+                        Kisebb számok is (pl. 5-nél: 2–5)
+                    </label>
+                </div>
+            </div>
         </div>
 
         <!-- Game Type Selection -->
@@ -112,30 +134,6 @@
 <!--             </button> -->
         </div>
 
-        <!-- Configuration Modal (normal game) -->
-        <div id="configModal" class="modal">
-            <div class="modal-content">
-                <h2 id="configTitle"></h2>
-
-                <div class="config-group">
-                    <label for="configValue" id="configLabel"></label>
-                    <select id="configValue" class="config-select"></select>
-                </div>
-
-                <div class="config-group" id="lowerNumbersGroup" style="display:none">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="includeLowerNumbers">
-                        Kisebb számok is (pl. 5-nél: 2, 3, 4, 5)
-                    </label>
-                </div>
-
-                <div class="modal-buttons">
-                    <button class="btn-primary" onclick="startGame()">Játék Indítása! 🚀</button>
-                    <button class="btn-secondary" onclick="closeModal()">Mégse</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Boss Battle Modal -->
         <div id="bossModal" class="modal">
             <div class="modal-content">
@@ -148,24 +146,11 @@
                 <!-- Math type -->
                 <div class="config-group">
                     <label for="bossGameType">Feladattípus:</label>
-                    <select id="bossGameType" class="config-select" onchange="updateBossDifficultyOptions()">
+                    <select id="bossGameType" class="config-select">
                         <option value="multiply">Szorzás / Osztás</option>
                         <option value="add">Összeadás / Kivonás</option>
                         <option value="precedence">Műveleti Sorrend</option>
                     </select>
-                </div>
-
-                <!-- Difficulty -->
-                <div class="config-group" id="bossDifficultyGroup">
-                    <label for="bossDifficulty" id="bossDifficultyLabel">Alapszám:</label>
-                    <select id="bossDifficulty" class="config-select"></select>
-                </div>
-
-                <div class="config-group" id="bossLowerNumbersGroup" style="display:none">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="bossIncludeLower">
-                        Kisebb számok is
-                    </label>
                 </div>
 
                 <div class="modal-buttons">
@@ -219,10 +204,16 @@
         (function() {
             const maxVal = document.getElementById('globalMaxValue');
             const maxDiv = document.getElementById('globalMaxDivisor');
+            const base  = document.getElementById('globalBase');
+            const incl  = document.getElementById('globalIncludeLower');
             maxVal.value = localStorage.getItem('globalMaxValue') || '20';
             maxDiv.value = localStorage.getItem('globalMaxDivisor') || '5';
+            base.value   = localStorage.getItem('globalBase') || '5';
+            incl.checked = localStorage.getItem('globalIncludeLower') === '1';
             maxVal.addEventListener('change', () => localStorage.setItem('globalMaxValue', maxVal.value));
             maxDiv.addEventListener('change', () => localStorage.setItem('globalMaxDivisor', maxDiv.value));
+            base.addEventListener('change',   () => localStorage.setItem('globalBase', base.value));
+            incl.addEventListener('change',   () => localStorage.setItem('globalIncludeLower', incl.checked ? '1' : '0'));
         })();
 
         // Theme selection
@@ -352,30 +343,7 @@
         });
 
         function selectGame(gameType) {
-            if (gameType === 'multiply') {
-                const modal = document.getElementById('configModal');
-                const configValue = document.getElementById('configValue');
-                configValue.innerHTML = '';
-                document.getElementById('configTitle').textContent = 'Szorzás / Osztás Beállítás';
-                document.getElementById('configLabel').textContent = 'Válassz alapszámot:';
-                for (let i = 2; i <= 10; i++) {
-                    const option = document.createElement('option');
-                    option.value = i;
-                    option.textContent = `${i}-es szorzótábla`;
-                    configValue.appendChild(option);
-                }
-                document.getElementById('lowerNumbersGroup').style.display = '';
-                document.getElementById('includeLowerNumbers').checked = false;
-                modal.dataset.gameType = gameType;
-                modal.style.display = 'flex';
-            } else {
-                // add and precedence use only global settings — start immediately
-                startGameDirect(gameType);
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('configModal').style.display = 'none';
+            startGameDirect(gameType);
         }
 
         function getGlobalMaxValue() {
@@ -392,35 +360,14 @@
             populateUserSelect();
             localStorage.setItem('currentGame', JSON.stringify({
                 type: gameType,
-                config: getGlobalMaxValue(),
+                config: gameType === 'multiply'
+                    ? parseInt(document.getElementById('globalBase').value)
+                    : getGlobalMaxValue(),
                 numQuestions: 20,
-                includeLowerNumbers: false,
+                includeLowerNumbers: gameType === 'multiply' && document.getElementById('globalIncludeLower').checked,
                 maxMultiplier: getGlobalMaxDivisor(),
                 playerName: playerName
             }));
-            window.location.href = 'game.html';
-        }
-
-        function startGame() {
-            const modal = document.getElementById('configModal');
-            const gameType = modal.dataset.gameType;
-            const configValue = document.getElementById('configValue').value;
-            const includeLowerNumbers = document.getElementById('includeLowerNumbers').checked;
-            const playerName = getCurrentPlayerName();
-
-            // Persist player name and refresh selector
-            localStorage.setItem('playerName', playerName);
-            populateUserSelect();
-
-            localStorage.setItem('currentGame', JSON.stringify({
-                type: gameType,
-                config: parseInt(configValue),
-                numQuestions: 20,
-                includeLowerNumbers: includeLowerNumbers,
-                maxMultiplier: getGlobalMaxDivisor(),
-                playerName: playerName
-            }));
-
             window.location.href = 'game.html';
         }
 
@@ -450,9 +397,6 @@
                 container.appendChild(card);
             });
 
-            // Populate difficulty options
-            updateBossDifficultyOptions();
-
             document.getElementById('bossModal').style.display = 'flex';
         }
 
@@ -460,37 +404,13 @@
             document.getElementById('bossModal').style.display = 'none';
         }
 
-        function updateBossDifficultyOptions() {
-            const gameType = document.getElementById('bossGameType').value;
-            const diffGroup = document.getElementById('bossDifficultyGroup');
-            const diffSelect = document.getElementById('bossDifficulty');
-            const lowerGroup = document.getElementById('bossLowerNumbersGroup');
-
-            diffSelect.innerHTML = '';
-            if (gameType === 'multiply') {
-                document.getElementById('bossDifficultyLabel').textContent = 'Alapszám:';
-                for (let i = 2; i <= 10; i++) {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = `${i}-es szorzótábla`;
-                    diffSelect.appendChild(opt);
-                }
-                diffGroup.style.display = '';
-                lowerGroup.style.display = '';
-            } else {
-                // add/precedence: config and maxMultiplier come from global settings
-                diffGroup.style.display = 'none';
-                lowerGroup.style.display = 'none';
-            }
-        }
-
         function startBossGame() {
             const gameType = document.getElementById('bossGameType').value;
             const playerName = localStorage.getItem('playerName') || 'Névtelen';
             const config = gameType === 'multiply'
-                ? parseInt(document.getElementById('bossDifficulty').value)
+                ? parseInt(document.getElementById('globalBase').value)
                 : getGlobalMaxValue();
-            const includeLower = gameType === 'multiply' && document.getElementById('bossIncludeLower').checked;
+            const includeLower = gameType === 'multiply' && document.getElementById('globalIncludeLower').checked;
 
             localStorage.setItem('currentGame', JSON.stringify({
                 type: gameType,
